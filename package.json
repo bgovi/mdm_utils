@@ -4,7 +4,16 @@
   "description": "Used to maintain utility functions for mdm system",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js", "mjs"],
+    "testMatch": [ "**/__tests__/**/*.?(m)js?(x)",
+      "**/?(*.)(spec|test).?(m)js?(x)"
+    ],
+    "moduleDirectories": ["node_modules", "src"]
+
+
   },
   "repository": {
     "type": "git",
@@ -16,5 +25,11 @@
   "bugs": {
     "url": "https://github.com/bgovi/mdm_utils/issues"
   },
-  "homepage": "https://github.com/bgovi/mdm_utils#readme"
+  "homepage": "https://github.com/bgovi/mdm_utils#readme",
+  "dependencies": {
+    "sql-template-strings": "^2.2.2"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
 }
