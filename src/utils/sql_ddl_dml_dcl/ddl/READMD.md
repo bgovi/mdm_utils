@@ -1,1 +1,0 @@
-Maintains ddl structure
