@@ -2,18 +2,14 @@
   "name": "mdm_utils",
   "version": "1.0.0",
   "description": "Used to maintain utility functions for mdm system",
-  "main": "index.js",
+  "main": "main-require.cjs",
+  "exports": {
+    "import": "./main-module.js",
+    "require": "./main-require.js"
+  },
+
   "scripts": {
     "test": "jest"
-  },
-  "jest": {
-    "moduleFileExtensions": ["js", "mjs"],
-    "testMatch": [ "**/__tests__/**/*.?(m)js?(x)",
-      "**/?(*.)(spec|test).?(m)js?(x)"
-    ],
-    "moduleDirectories": ["node_modules", "src"]
-
-
   },
   "repository": {
     "type": "git",
