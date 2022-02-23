@@ -31,6 +31,11 @@ query_params: object or array of objects: contains data required for payload par
 
 Returning: *
 */
+let default_values = [
+    'default', 'current_timestamp', 'current_time','null',
+    'current_date', 'localtime', 'localtimestamp', ""
+]
+
 
 //route_token: ?
 
@@ -83,6 +88,8 @@ function returning_str() {
 function default_values() {
     /*
     if name in list return value otherwise return default
+
+    if empty string return "''"
     */
 }
 
