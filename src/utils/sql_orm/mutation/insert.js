@@ -15,5 +15,20 @@ set default set null
 
 payload (null as default)
 */
-const SQL = require('sql-template-strings')
 
+function insert_statement(schema_name, table_name, row_data, insert_params) {}
+
+function bulk_insert_statement(schema_name, table_name, row_data, insert_params) {}
+
+
+//insert_params:
+function ax () {
+
+    columns = ""
+    values  = ""
+
+    `INSERT INTO "${schema_name}"."${table_name}" (columns) VALUES (  )`
+}
+
+//onconflicts?
+//1600 columns
