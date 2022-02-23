@@ -67,3 +67,26 @@ let insert_params = [{
 }]
 
 var ignore_list = ['id', '_created_at', '_last_user_id']
+
+function ignore_list_fn(column_name) {
+    if (column_name in ignore_list) { return true }
+}
+
+function returning_str() {
+    let returning_string = '*'
+    /*
+    check statements pass
+    */
+    return returning_string
+}
+
+function default_values() {
+    /*
+    if name in list return value otherwise return default
+    */
+}
+
+module.exports = {
+    'ignore_list': ignore_list_fn,
+    'return_str': returning_str
+}

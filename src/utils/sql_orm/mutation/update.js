@@ -16,9 +16,7 @@ function update_statement(schema_name, table_name, row_data, insert_params) {
     */
     let update_params = create_set_statement()
     let returning_str = return_str()
-    let query = ` UPDATE table_name SET ${update_params.set_str} WHERE ${update_params.where_str} RETURNING ${returning_str} `
-
-
+    let query = `UPDATE  "${schema_name}"."${table_name}" SET ${update_params.set_str} WHERE ${update_params.where_str} RETURNING ${returning_str} `
 }
 
 

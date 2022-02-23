@@ -47,3 +47,9 @@ convert data and query params to array of objects if
 //     client.release()
 //   }
 // })().catch(e => console.error(e.stack))
+
+
+/*
+error_handling?
+
+*/
