@@ -1,3 +1,5 @@
+Returns a list of sql statements and params to run for node postgres
+
 sql_ddl_dml_dcl
 
 ddl:

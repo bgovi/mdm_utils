@@ -57,3 +57,13 @@ let query_params = [{
 //return_object
 //need immediate rejection
 //need to check column values
+
+
+let insert_params = [{
+    "default_fields": "",
+    "on_conflict": "",
+    "on_constraint": "",
+    "set_fields": ""
+}]
+
+var ignore_list = ['id', '_created_at', '_last_user_id']
