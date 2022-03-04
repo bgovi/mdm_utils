@@ -24,7 +24,14 @@ let insert_params = [{
 
 */
 
-var ignore_list = ['id', '_created_at_','_updated_at_' ,'_last_user_id_']
+
+let insert_params = [{
+    "default_fields": "",
+    "on_conflict": "",
+    "on_constraint": "",
+    "set_fields": ""
+}]
+
 
 function insert_statement(schema_name, table_name, row_data, insert_params) {
     /*

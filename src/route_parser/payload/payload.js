@@ -1,10 +1,9 @@
 /*
 This module defines the payload structure for crud operations:
 
-
+Need to define output structure
 */
-const id_check = require('../indentifier_check/identifier_check.js')
-var reserved_columns = ['id', '_created_at','_updated_at' ,'_last_user_id']
+var reserved_columns = ['id', '_created_at','_updated_at','_deleted_at'  ,'_last_user_id']
 
 let default_values = [
     'default', 'current_timestamp', 'current_time','null',
@@ -36,14 +35,15 @@ let query_params = [{
 //return_object
 //need immediate rejection
 //need to check column values
-let insert_params = [{
-    "default_fields": "",
-    "on_conflict": "",
-    "on_constraint": "",
-    "set_fields": ""
-}]
+
 
 function is_reserved_column(column_name) {
+    /*
+    This funciton checks if input column is reserved. Used to filter out payload
+    in crud operations (insert, update, delete) 
+
+    All json data should be passed to a function if used.
+    */
     if (reserved_columns.includes(column_name)) { return true }
     return false
 }
@@ -66,7 +66,7 @@ function returning_str(query_param) {
     return rtx_out.join(' , ')
 }
 
-function default_value(psql_reserved_constant) {
+function return_valid_default_value(psql_reserved_constant) {
     /*
     if name in list return value otherwise return default
 
@@ -78,5 +78,6 @@ function default_value(psql_reserved_constant) {
 
 module.exports = {
     'is_reserved_column': is_reserved_column,
-    'returning_str': returning_str
+    'returning_str': returning_str,
+    'return_valid_default_value': return_valid_default_value
 }
