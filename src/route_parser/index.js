@@ -1,11 +1,13 @@
 /*
 Need to validate schema and table name
+
+Need restricted schema names:
 */
 
 const id_check = require('./indentifier_check/identifier_check.js')
 
 
-var op_names = [ "help", "map", "select", "insert",
+var op_names = [ "help", "map", "search", "select", "insert",
 "batch_insert", "upsert", "batch_upsert", "update",
 "delete", "delete_at", "execute"
 ]
@@ -33,8 +35,13 @@ function is_valid_operation(operation_name) {
     }
 }
 
+function check_restricted_schema(schema_name) {
+    return
+}
+
 function is_valid_schema_object_crud(schema_name, object_name, operation_name){
     //make sure name only is alphaNumeric and underscore
+    check_restricted_schema(schema_name)
     check_identifier_error(schema_name)
     check_identifier_error(object_name)
     check_identifier_error(operation_name)
