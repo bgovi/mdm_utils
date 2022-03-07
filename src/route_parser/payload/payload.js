@@ -20,7 +20,7 @@ let route_object = {
 let query_params = [{
     "crud_type": "", //only needed for save route 
     "data": "", //object or array of objects: {x:"valx", y:"valy"} or [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
-    "default_fields": "",
+    "default_fields": "", //object with default type
     "set_fields": "",
     "on_conflict": "",
     "on_constraint": "",

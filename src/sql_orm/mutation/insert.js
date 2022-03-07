@@ -37,9 +37,22 @@ function insert_statement(schema_name, table_name, row_data, insert_params) {
     /*
     Batch size?
     */
+    //if on conflict or on restraint
+
+
+    //check_row_data has valid identifier
+    //check on_conflict and or on_constraint is valid identifier
+
+    return { "query": `INSERT INTO "${schema_name}"."${table_name}" ${columns} VALUES ${values}`, "params": [row_id] }
+
+    //returning?
 
 }
 
+function upsert_statement (schema_name, table_name, row_data, insert_params) {
+
+
+}
 
 
 function parameter_generator(row_data) {
