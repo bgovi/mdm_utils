@@ -30,6 +30,23 @@ async function RoutePermissions(req, table_id, next = null) {
 
 }
 
+/*
+ModifyPass and ModifyFail are wrappers for all insert,update,delete and upsert return objects
+*/
+function ModifyPass (row_node_id,  row_id) {
+    //crud_type: insert, delete, 
+    return {'is_error': false, 'node_id': row_node_id,  'error_msg': '', 'id': row_id }
+
+}
+
+function ModifyFail (row_node_id,   row_id, err_msg) {
+    //try catch for error message?
+    return {'is_error': true, 'node_id': row_node_id, 'error_msg': err_msg, 'id': row_id }
+
+}
+
+
+
 async function SpecialtyPermissions(req) {
     //return specialties permissons. json array of ids? maybe switch to object
     var req_body = req['body']

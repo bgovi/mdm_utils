@@ -49,6 +49,17 @@ function is_valid_schema_object_crud(schema_name, object_name, operation_name){
 }
 
 
+function ExtractNodeId(data_row) {
+    try {
+        var tmp = parseInt(data_row['node_id'])
+        if (isNaN(tmp) ){return -1} else{ return tmp} 
+    } catch {
+        return -1
+    }
+
+}
+
+
 module.exports = {
     'valid_identifier': id_check.valid_identifier,
     'check_identifier_error': id_check.check_identifier_error,
