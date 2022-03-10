@@ -7,7 +7,6 @@
     "import": "./src/main-module.mjs",
     "require": "./src/main-module.cjs"
   },
-
   "scripts": {
     "test": "jest"
   },
@@ -23,6 +22,7 @@
   },
   "homepage": "https://github.com/bgovi/mdm_utils#readme",
   "dependencies": {
+    "jsonwebtoken": "^8.5.1",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
