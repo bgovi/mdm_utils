@@ -1,5 +1,6 @@
 /*
-Need to have explicit typ: jwt
+This module handles all required options for using
+jsonwebtoken library
 
 
 */
@@ -7,10 +8,10 @@ const jwt = require('jsonwebtoken')
 
 
 //maxAge: 1000, "2 days", "10h", "7d"
-
-function jwt_create(jwt_key, payload) {
-    var token = jwt.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256'});
-
+//need to add options default instead of expiresIn
+function jwt_create(jwt_key, payload, expiresIn='7d') {
+    let token = jwt.sign(payload, jwt_key, {expiresIn: expiresIn})
+    return token
 }
 
 
@@ -30,10 +31,13 @@ function jwt_is_valid(jwt_token, jwt_key) {
 
 }
 
-function jwt_is_expired(json_jwt) {
-
+function jwt_decoded(jwt_token) {
+    let decoded = jwt.decode(jwt_token)    
+    return decoded.payload
 }
 
+
+function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {}
 
 
 //refresh_refresh_token
@@ -44,5 +48,7 @@ function jwt_is_expired(json_jwt) {
 //refresh global jwt_placeholder
 module.exports = {
     'jwt_is_valid': jwt_is_valid,
-    'jwt_to_json': jwt_to_json
+    'jwt_decoded': jwt_decoded,
+    'jwt_create': jwt_create,
+    'jwt_refresh': jwt_refresh
 }
