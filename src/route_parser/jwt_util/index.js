@@ -37,7 +37,19 @@ function jwt_decoded(jwt_token) {
 }
 
 
-function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {}
+function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {
+    // const payload = jwt.verify(token, this.secretOrPublicKey, refreshOptions.verify);
+    // delete payload.iat;
+    // delete payload.exp;
+    // delete payload.nbf;
+    // delete payload.jti; //We are generating a new token, if you are using jwtid during signing, pass it in refreshOptions
+    // const jwtSignOptions = Object.assign({ }, this.options, { jwtid: refreshOptions.jwtid });
+    // // The first signing converted all needed options into claims, they are already in the payload
+    // return jwt.sign(payload, this.secretOrPrivateKey, jwtSignOptions);
+
+
+
+}
 
 
 //refresh_refresh_token
