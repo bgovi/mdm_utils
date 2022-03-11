@@ -56,11 +56,10 @@ function insert_statement(schema_name, table_name, row_data, insert_params) {
 
 function upsert_statement (schema_name, table_name, row_data, insert_params) {
 
+    
+
 
 }
-
-
-function batch () {}
 
 
 function parameter_generator(row_data) {
