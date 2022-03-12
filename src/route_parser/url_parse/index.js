@@ -1,32 +1,37 @@
 /*
-Used to parse optional query arguments from url.
+Used to parse optional query arguments from url. Default key value pair in query string
+is used as a filter in the where statement. All column names must be check columnName is url_safe [A-Za-z0-9_]
 
-Converts values from url type safe to values.
+?column_name=value //this gets converted to ('eq':value)
+?column_name=json_object (from bellow)
 
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent
-
-check columnName is url_safe
-
-url_query json types
 {'in':[values]}
 {'not_in':[values]}
 {'lt':value}
 {'gt':value}
-{'between':[values]}
-{'not_between':[values]}
+{'between':[values]} //must contain 2 values
+{'not_between':[values]} //must contain 2 values
 {'eq':value}
 
-//boolean?
-?column_name={'between':[values]}
-?column_name=value
+These are special key names that are parsed in a customized way.
+.sort.  =[{'column_name': 'asc'},{'column_name': 'desc'} ] //for sorting can use a or d for short
+.where. =[{'column_name': {'eq':value} ] //for filtering
+.param. =[{'column_name': value}]  //for parameters calls
+.dval.  = [{'column_name': value}] //default values instead of null
+.id. = value  //id of route
+.limit.=value //pagination limit
+.offset.=value //pagination offset
 
-.sort.  =[{'column_name': url_query json types}]
-.where. =[{'column_name': url_query json types}]
-.param. =[{'column_name': url_query json types}] 
-.dval.  = [{'column_name': value}] 
-.id. = value
-.limit.=value
-.offset.=value
+Converts values from url type safe to values.
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent
+
+
+ParseUrlQuery: expects a query string or object with key value pairs:
+Returns:
+url_query_object = {'where': where_object,
+    'page': page_object,
+    'sort': sort_object,
+    'config': config_object } //contains param, dval, id
 
 encodeURIComponent
 decodeURIComponent
@@ -43,8 +48,6 @@ function ParseUrlQuery(req_query) {
     /*
     req_query is object or is string
 
-
-    not specialized objects go to where statement
 
     */
     //modify url string to req_query object or do nothing
@@ -76,68 +79,73 @@ function ParseUrlQuery(req_query) {
     return url_query_object
 }
 
-function ParseSpecialKeys(url_key, qval, where_object, page_object, config_object) {
+function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object, config_object) {
     /*
     {'.sort.': jsonObject}
     [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
 
 
     */
-
-    let new_key = qval //after parsing
-    // if (! idk.valid_identifier(qkey)) { continue }
-
-    if (url_key === ".sort." ) {
-
-    } else if ( url_key === ".where." ) {
-        ParseWhereUrl(qval, where_object)
-
-
-    } else if ( url_key === ".param." ) {
-
-    } else if ( url_key === ".dval." ) {
-
-    } else if ( url_key === ".id." ) {
-
-    } else if ( url_key === ".limit." ) {
-
-    } else if ( url_key === ".offset." ) {
-
-    }
-
+    if (url_key === ".sort." ) { ParseSortUrl(qval, sort_object) }
+    else if ( url_key === ".where." ) { ParseWhereUrl(qval, where_object) }
+    else if ( url_key === ".param." ) { ParseParamDvalUrl(url_key,qval, config_object)} 
+    else if ( url_key === ".dval." )  { ParseParamDvalUrl(url_key,qval, config_object) } 
+    else if ( url_key === ".id." ) { ParseIdUrl(qval, config_object) } 
+    else if ( url_key === ".limit." || url_key === ".offset." ) { ParsePageUrl(url_key, qval, page_object) }
 }
 
-function ExtractSpecialKeyJsonObject(qvalue) {
+function ParseWhereUrl(where_parameters, where_object){
+    /*
+    where_parameters = [{'column_name': {'eq':value}, ... ]
 
-    // [{'column_name': url_query json types}]
-    IsJsonObject(qvalue)
-
-}
-
-function ParseWhereUrl(qval, where_object){
-    //loop though qval
-    let query_keys = Object.keys(req_query)
+    */
+    let query_keys = Object.keys(where_parameters)
     for(var i =0; i < query_keys.length; i++) {
-        //check valid key
         let qkey  = query_keys[i]
-        let qval  = req_query[key]
-            //if key not valid skip
-            if (! idk.valid_identifier(qkey)) { continue }
-            //check key is valid
-            let is_json = IsJsonObject(query_keys[i])
-            if (is_json['is_json']) {
-                AssembleWhereQueryObject(where_object, qkey,is_json['value']) 
-            } else {
-                AssembleWhereQueryObject(where_object, qkey,{'eq': String(is_json['value'] ) })
-            }
+        let qval  = where_parameters[qkey]
+        //if key not valid skip
+        if (! idk.valid_identifier(qkey)) { continue }
+        //check key is valid
+        AssembleWhereQueryObject(where_object, qkey,qval)
     }
 }
 
-function ParseSortUrl(){}
-function ParseParamUrl(){}
-function ParseDvalUrl(){}
-function ParseIdUrl(){}
-function ParsePageUrl(){}
+function ParseSortUrl(sort_params, sort_object){
+    /*
+    .sort.  =[{'column_name': 'asc'},{'column_name': 'desc'} ] //for sorting
+    */
+    let query_keys = Object.keys(sort_params)
+    for(var i =0; i < query_keys.length; i++) {
+        let qkey  = query_keys[i]
+        let qval  = String(sort_params[qkey]).trim()
+        //if key not valid skip
+        if (! idk.valid_identifier(qkey)) { continue }
+        if (qval === 'asc' || qval === 'd') {
+            sort_object.push({qkey:'asc'})
+        } else if (qval === 'desc' || qval === 'd') {
+            sort_object.push({qkey:'desc'})
+        }
+    }
+}
+function ParseParamDvalUrl(url_key,p_params, config_object){
+    /*
+        .param. =[{'column_name': value}]  //for parameters calls
+        .dval.  = [{'column_name': value}] //default values instead of null
+    */
+    let x = {}
+    let query_keys = Object.keys(p_params)
+    for(var i =0; i < query_keys.length; i++) {
+        let qkey  = query_keys[i]
+        let qval  = p_params[qkey]
+        //if key not valid skip
+        if (! idk.valid_identifier(qkey)) { continue }
+        x[qkey] = qval
+    }
+    config_object[url_key.replace(".","")] = x
+}
+
+function ParseIdUrl(qval, config_object){ config_object['id'] = qval }
+function ParsePageUrl(url_key, qval, page_object){ page_object[url_key.replace(".","")] = qval }
 
 
 function IsJsonObject(query_str_value) {
@@ -221,4 +229,4 @@ function StringifyArray(array_object) {
 }
 
 
-
+module.exports = ParseUrlQuery
