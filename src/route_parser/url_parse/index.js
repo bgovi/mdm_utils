@@ -88,8 +88,7 @@ function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object,
     */
     if (url_key === ".sort." ) { ParseSortUrl(qval, sort_object) }
     else if ( url_key === ".where." ) { ParseWhereUrl(qval, where_object) }
-    else if ( url_key === ".param." ) { ParseParamDvalUrl(url_key,qval, config_object)} 
-    else if ( url_key === ".dval." )  { ParseParamDvalUrl(url_key,qval, config_object) } 
+    else if ( url_key === ".param." || url_key === ".dval." ) { ParseParamDvalUrl(url_key,qval, config_object)} 
     else if ( url_key === ".id." ) { ParseIdUrl(qval, config_object) } 
     else if ( url_key === ".limit." || url_key === ".offset." ) { ParsePageUrl(url_key, qval, page_object) }
 }
@@ -229,4 +228,16 @@ function StringifyArray(array_object) {
 }
 
 
-module.exports = ParseUrlQuery
+module.exports = {
+    'ParseUrlQuery':ParseUrlQuery,
+    'ParseSpecialKeys': ParseSpecialKeys,
+    'ParseWhereUrl': ParseWhereUrl,
+    'ParseSortUrl': ParseSortUrl,
+    'ParseParamDvalUrl': ParseParamDvalUrl,
+    'ParseIdUrl': ParseIdUrl,
+    'ParsePageUrl': ParsePageUrl,
+    'IsJsonObject': IsJsonObject,
+    'AssembleWhereQueryObject': AssembleWhereQueryObject,
+    'IsValidArray': IsValidArray,
+    'StringifyArray': StringifyArray
+}
