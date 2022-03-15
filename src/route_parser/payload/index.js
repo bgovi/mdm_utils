@@ -3,7 +3,7 @@ This module defines the payload structure for crud operations
 
 row_data : {'column_name1': 'column_value1', 'column_name2': 'column_value2'}
 */
-
+const idx = require('../indentifier_check')
 
 var reserved_columns = [
     /*
@@ -51,10 +51,10 @@ function default_object(default_row_data) {
     Checks if default_value is acceptable. If not returns default. for the column_name
     */
     let def_object = {}
-    let row_keys = Object.keys(row_data)
+    let row_keys = Object.keys(default_row_data)
     for (var i = 0; i < row_keys.length; i++) {
         let rowKey = row_keys[i]
-        let dval   = row_data[ rowKey ]
+        let dval   = default_row_data[ rowKey ]
         let defval = return_valid_default_value(dval)
         def_object[rowKey] = defval 
     }
@@ -100,22 +100,33 @@ function is_reserved_column(column_name) {
     return false
 }
 
-function returning_str(query_param) {
-    if (! query_param.hasOwnProperty('returning') ) { return '"id"' }
-    let rtx = query_param['returning']
-    if (typeof rtx === 'string') {
-        if (rtx == "*") {return "*"}
-        if ( id_check.valid_identifier(rtx)) { return '"'+rtx+'"' }
-    }
-    if (! Array.isArray(rtx) ) {return '"id"'}
+function returning_str(returning_param) {
+    /*
+    null means dont use returning string
+    id
+    *
+    [array of column names]
+    */
+    if (returning_param == null) {return ""}
 
-    let rtx_out = []
-    for (let i =0; i < rtx.length; i++) {
-        if ( id_check.valid_identifier(rtx[i])) { rtx_out.push( '"'+rtx+'"' ) }
-    }
-    if (rtx_out.length == 0) { return '"id"' }
 
-    return rtx_out.join(' , ')
+    if (typeof returning_param === 'string') {
+        if (returning_param === "") {return "" }
+
+        if (returning_param === "count(*)") {return "RETURNING count(*)"}
+        if ( id_check.valid_identifier(returning_param)) { return ' RETURNING ' +'"'+returning_param+'"' }
+        else { return "" }
+
+    }
+    let rtx = returning_param
+    if (! Array.isArray(rtx) ) {return ''}
+    if (rtx.length === 0) { return '' }
+    let ax = []
+    for (var i =0; i < rtx.length; i++) {
+        if ( id_check.valid_identifier(rtx[i])) {  ax.push('"'+rtx[i]+'"') }        
+    }
+    if (ax.length === 0) { return '' }
+    return "RETURNING " + ax.join(' , ')
 }
 
 /*
@@ -148,7 +159,7 @@ function return_output(schema_name, table_name,crud_type,output, is_error=false,
         'crud_type': crud_type,
         'is_error': is_error,
         'error_msg': err_msg,
-        'output': []
+        'output': output
     }
     return output
 }

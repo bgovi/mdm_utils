@@ -1,10 +1,12 @@
 /*
 Need to validate schema and table name
 
+add schema and column name checking here.
+
 Need restricted schema names:
 */
 
-const id_check = require('./indentifier_check/identifier_check.js')
+const id_check = require('../indentifier_check')
 
 
 var op_names = [ "help", "map", "search", "select", "insert",
