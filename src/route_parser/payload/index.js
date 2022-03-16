@@ -57,6 +57,7 @@ function default_object(default_row_data) {
     let row_keys = Object.keys(default_row_data)
     for (var i = 0; i < row_keys.length; i++) {
         let rowKey = row_keys[i]
+        if ( ! idx.valid_identifier(rowKey)) { continue }
         let dval   = default_row_data[ rowKey ]
         let defval = return_valid_default_value(dval)
         def_object[rowKey] = defval 
@@ -103,40 +104,6 @@ function is_reserved_column(column_name) {
     return false
 }
 
-function returning_str(returning_param) {
-    /*
-    Creates the Returning string to append to crud operations.
-
-    To skip returning statement use:
-        null, [], or ""
-    the string count(*) is a special command to return all effected rows.
-    Otherwise potential columns are checked for validity and wrapped in double qoutes.
-
-    Returns:
-        "" or RETURNING "param1", "param2", ...
-    */
-    if (returning_param == null) {return ""}
-
-
-    if (typeof returning_param === 'string') {
-        if (returning_param === "") {return "" }
-
-        if (returning_param === "count(*)") {return "RETURNING count(*)"}
-        if ( id_check.valid_identifier(returning_param)) { return ' RETURNING ' +'"'+returning_param+'"' }
-        else { return "" }
-
-    }
-    let rtx = returning_param
-    if (! Array.isArray(rtx) ) {return ''}
-    if (rtx.length === 0) { return '' }
-    let ax = []
-    for (var i =0; i < rtx.length; i++) {
-        if ( id_check.valid_identifier(rtx[i])) {  ax.push('"'+rtx[i]+'"') }        
-    }
-    if (ax.length === 0) { return '' }
-    return "RETURNING " + ax.join(' , ')
-}
-
 
 
 /*
@@ -177,7 +144,6 @@ function return_output(schema_name, table_name,crud_type,output, is_error=false,
 
 module.exports = {
     'is_reserved_column': is_reserved_column,
-    'returning_str': returning_str,
     'return_valid_default_value': return_valid_default_value,
     'return_output': return_output,
     'default_object': default_object
