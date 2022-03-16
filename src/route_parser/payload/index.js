@@ -2,6 +2,9 @@
 This module defines the payload structure for crud operations
 
 row_data : {'column_name1': 'column_value1', 'column_name2': 'column_value2'}
+
+Also provides functions to process
+RETURNING statement
 */
 const idx = require('../indentifier_check')
 
@@ -102,10 +105,15 @@ function is_reserved_column(column_name) {
 
 function returning_str(returning_param) {
     /*
-    null means dont use returning string
-    id
-    *
-    [array of column names]
+    Creates the Returning string to append to crud operations.
+
+    To skip returning statement use:
+        null, [], or ""
+    the string count(*) is a special command to return all effected rows.
+    Otherwise potential columns are checked for validity and wrapped in double qoutes.
+
+    Returns:
+        "" or RETURNING "param1", "param2", ...
     */
     if (returning_param == null) {return ""}
 
@@ -129,6 +137,8 @@ function returning_str(returning_param) {
     return "RETURNING " + ax.join(' , ')
 }
 
+
+
 /*
 This module contains all the wrapper functions than handle the returned output for all routes.
 
@@ -148,10 +158,11 @@ This module contains all the wrapper functions than handle the returned output f
     from select:
         output: [{row1}, {row2}]
 
+    is_error is for errors that happen at the route level i.e. a server error.
+    in the output array error values can be added to each crud operation.
+
     may add row preservation:
 */
-
-
 function return_output(schema_name, table_name,crud_type,output, is_error=false, err_msg="") {
     output = {
         'schema_name': schema_name,

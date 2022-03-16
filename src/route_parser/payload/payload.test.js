@@ -36,30 +36,6 @@ test('Invalid default name returns default', () => {expect(px.return_valid_defau
 test('Valid default name returns same name', () => {expect(px.return_valid_default_value('current_timestamp')).toBe('current_timestamp') });
 //returning_str
 
-// return_valid_default_value(psql_reserved_constant)
-// test.each
-//empty space check
-
-// invalid_characters = ["'", '"', "`", "~",  "!", "@",
-//   "#","$", "%", "^", "&", "(",")","-","=","+",
-//   "{", "}", "[", "]", "|", "\\", ":", ";", "<", ">",
-//   ",", ".", "?", "/", "*", "", "test with spaces"]
-
-// test.each(invalid_characters)(
-//   'Invalid Character %s',
-//   (ident_str) => { expect( ic.valid_identifier(ident_str) ).toBe(false) }
-// );
-
-
-// test('Valid string no error thrown', () => {
-//   expect(() => ic.check_identifier_error('random_name')).not.toThrow();
-// });
-
-// test.each(invalid_characters)(
-//   'Throw Error Invalid Character %s',
-//   (ident_str) => { expect(() => ic.check_identifier_error(ident_str)).toThrow() }
-// );
-
 // is_reserved_column,
 
 // returning_str,
