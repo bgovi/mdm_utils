@@ -1,14 +1,10 @@
 /**
  * Just few lines to test the behavior.
  */
+const jwtx = require('./index.js');
 
- const TokenGenerator = require('./token-generator');
- const jwt = require('jsonwebtoken');
- 
- const tokenGenerator = new TokenGenerator('a', 'a', { algorithm: 'HS256', keyid: '1', noTimestamp: false, expiresIn: '2m', notBefore: '2s' })
- token = tokenGenerator.sign({ myclaim: 'something' }, { audience: 'myaud', issuer: 'myissuer', jwtid: '1', subject: 'user' })
- setTimeout(function () {
-   token2 = tokenGenerator.refresh(token, { verify: { audience: 'myaud', issuer: 'myissuer' }, jwtid: '2' })
-   console.log(jwt.decode(token, { complete: true }))
-   console.log(jwt.decode(token2, { complete: true }))
- }, 3000)
+// function jwt_create(jwt_key, payload, expiresIn='7d') {}
+// function jwt_is_valid(jwt_token, jwt_key) {}
+// function jwt_decoded(jwt_token) {}
+// function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {}
+test('jwt_util import test', () => {expect(false).toBe(false)});

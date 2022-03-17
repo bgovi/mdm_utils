@@ -49,7 +49,12 @@ function ParseUrlQuery(req_query) {
     req_query is object or is string
 
 
+
     */
+    if (typeof req_query === 'string') {
+        req_query = GetJsonFromUrl(url_string)
+    }
+
     //modify url string to req_query object or do nothing
     let query_keys = Object.keys(req_query)
     let where_object  = []
@@ -78,6 +83,23 @@ function ParseUrlQuery(req_query) {
     let url_query_object = {'where': where_object, 'page': page_object, 'sort': sort_object, 'config': config_object }
     return url_query_object
 }
+
+function GetJsonFromUrl(url_string) {
+    /*
+    Parses query string into 
+    */
+    let q = url_string
+    if (q.length === 0) { return {} }
+    if (q.charAt(0) === '?') {q = substr(1) }
+
+    var result = {};
+    q.split("&").forEach(function(part) {
+      var item = part.split("=");
+      result[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
+    });
+    return result;
+}
+
 
 function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object, config_object) {
     /*
@@ -239,5 +261,6 @@ module.exports = {
     'IsJsonObject': IsJsonObject,
     'AssembleWhereQueryObject': AssembleWhereQueryObject,
     'IsValidArray': IsValidArray,
+    'GetJsonFromUrl': GetJsonFromUrl,
     'StringifyArray': StringifyArray
 }

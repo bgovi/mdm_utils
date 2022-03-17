@@ -46,18 +46,8 @@ function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {
     // const jwtSignOptions = Object.assign({ }, this.options, { jwtid: refreshOptions.jwtid });
     // // The first signing converted all needed options into claims, they are already in the payload
     // return jwt.sign(payload, this.secretOrPrivateKey, jwtSignOptions);
-
-
-
 }
 
-
-//refresh_refresh_token
-//refresh_access_token
-
-//expires?
-//global jwt_placeholder
-//refresh global jwt_placeholder
 module.exports = {
     'jwt_is_valid': jwt_is_valid,
     'jwt_decoded': jwt_decoded,

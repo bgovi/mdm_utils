@@ -2,6 +2,7 @@
 
 
 */
+const up = require('./index.js')
 
 // module.exports = {
 //     'ParseUrlQuery':ParseUrlQuery,
