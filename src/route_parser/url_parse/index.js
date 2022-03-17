@@ -52,7 +52,7 @@ function ParseUrlQuery(req_query) {
 
     */
     if (typeof req_query === 'string') {
-        req_query = GetJsonFromUrl(url_string)
+        req_query = GetJsonFromUrl(req_query)
     }
 
     //modify url string to req_query object or do nothing
@@ -64,7 +64,7 @@ function ParseUrlQuery(req_query) {
     for(var i =0; i < query_keys.length; i++) {
         //check valid key
         let qkey  = decodeURIComponent(query_keys[i])
-        let qval  = decodeURIComponent(req_query[key])
+        let qval  = decodeURIComponent(req_query[qkey])
         if (restricted_keys.includes(qkey)) {
             ParseSpecialKeys(qkey, qval,where_object, page_object, sort_object, config_object)
         }
@@ -72,12 +72,9 @@ function ParseUrlQuery(req_query) {
             //if key not valid skip
             if (! idk.valid_identifier(qkey)) { continue }
             //check key is valid
-            let is_json = IsJsonObject(query_keys[i])
-            if (is_json['is_json']) {
-                AssembleWhereQueryObject(where_object, qkey,is_json['value']) 
-            } else {
-                AssembleWhereQueryObject(where_object, qkey,{'eq': String(is_json['value'] ) })
-            }
+            let is_json = IsJsonObject(qval)
+            console.log(qval)
+            AssembleWhereQueryObject(where_object, qkey, is_json)
         }
     }
     let url_query_object = {'where': where_object, 'page': page_object, 'sort': sort_object, 'config': config_object }
@@ -90,7 +87,7 @@ function GetJsonFromUrl(url_string) {
     */
     let q = url_string
     if (q.length === 0) { return {} }
-    if (q.charAt(0) === '?') {q = substr(1) }
+    if (q.charAt(0) === '?') {q = q.substr(1) }
 
     var result = {};
     q.split("&").forEach(function(part) {
@@ -176,10 +173,18 @@ function IsJsonObject(query_str_value) {
     */
     try {
         let json_value = JSON.parse(query_str_value)
+        if (
+            typeof json_value === 'object' &&
+            !Array.isArray(json_value) &&
+            json_value !== null
+        ) {
+            return json_value
+        } else {
+            return {'eq': json_value }
+        }
 
-        return {'is_json':true, 'value': json_value}
     } catch (e) {
-        return {'is_json':false, 'value': query_str_value}
+        return  {'eq': String( query_str_value ) }
     }
 }
 
@@ -189,8 +194,12 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
     //force everything to a string?
 
     */
+    console.log('hi')
+    console.log(json_object)
    let key = Object.keys(json_object)[0]
    let value = json_object[key]
+    // console.log(key)
+    // console.log(value)
 
     if (key === 'in') {
         if (IsValidArray(value), len_min =1 ) {
