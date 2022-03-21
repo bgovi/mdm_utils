@@ -23,6 +23,7 @@
   "homepage": "https://github.com/bgovi/mdm_utils#readme",
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
+    "relaxed-json": "^1.0.3",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {

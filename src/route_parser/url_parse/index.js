@@ -12,6 +12,7 @@ is used as a filter in the where statement. All column names must be check colum
 {'between':[values]} //must contain 2 values
 {'not_between':[values]} //must contain 2 values
 {'eq':value}
+{'neq':value}
 
 These are special key names that are parsed in a customized way.
 .sort.  =[{'column_name': 'asc'},{'column_name': 'desc'} ] //for sorting can use a or d for short
@@ -36,9 +37,12 @@ url_query_object = {'where': where_object,
 encodeURIComponent
 decodeURIComponent
 */
-const idk = require('../indentifier_check')
+const idk   = require('../indentifier_check')
+const RJSON = require('relaxed-json') 
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
+var operators = ['in', 'not_in', 'lt', 'gt', 'between', 'not_between', 'eq', 'neq']
+
 
 //for client side need wrapper to parse into req_query form
 
@@ -71,15 +75,61 @@ function ParseUrlQuery(req_query) {
         else {
             //if key not valid skip
             if (! idk.valid_identifier(qkey)) { continue }
-            //check key is valid
-            let is_json = IsJsonObject(qval)
-            console.log(qval)
-            AssembleWhereQueryObject(where_object, qkey, is_json)
+            let qval2 = ParseQval(qval) //returns object
+            if (Object.keys(qval2) === 0 ) {continue}
+            AssembleWhereQueryObject(where_object, qkey, qval2)
         }
     }
     let url_query_object = {'where': where_object, 'page': page_object, 'sort': sort_object, 'config': config_object }
     return url_query_object
 }
+
+function ParseQval(query_value) {
+    /*
+    query_value can be a string. A string as json or an object
+    Parses value component of ?x=value. If json convert to json object
+    other wise return value
+    */
+   let json_object = {}
+   if (typeof query_value === 'string') {
+       try {
+        let json_string = RJSON.transform(query_value)
+        let jx = JSON.parse(json_string)
+        if (IsObject(jx)) {
+            json_object = jx
+        } else {
+            json_object = {'eq': String( query_value ) }
+        }
+       }
+       catch (e) { json_object = {'eq': String( query_value ) } }
+    }
+    else if (typeof query_value === 'number') {
+        json_object = {'eq': String( query_value ) }
+    } 
+    else {
+        if (IsObject(query_value)) { json_object = query_value }
+        else { json_object = {'eq': String( query_value ) } }
+    }
+
+    let query_keys = Object.keys(json_object)
+    if (query_keys.length === 0) {return {}}
+    if (! operators.includes(query_keys[0]) ) {return {}}
+    return json_object
+
+}
+
+function IsObject(json_object) {
+    //check if object
+    if (
+        typeof json_object === 'object' &&
+        !Array.isArray(json_object) &&
+        json_object !== null
+    ) {return true} else {
+        return false
+    }
+
+}
+
 
 function GetJsonFromUrl(url_string) {
     /*
@@ -92,7 +142,7 @@ function GetJsonFromUrl(url_string) {
     var result = {};
     q.split("&").forEach(function(part) {
       var item = part.split("=");
-      result[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
+      result[decodeURIComponent(item[0])] = decodeURIComponent(item[1])
     });
     return result;
 }
@@ -165,28 +215,6 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
 function ParseIdUrl(qval, config_object){ config_object['id'] = qval }
 function ParsePageUrl(url_key, qval, page_object){ page_object[url_key.replace(".","")] = qval }
 
-
-function IsJsonObject(query_str_value) {
-    /*
-    Parses value component of ?x=value. If json convert to json object
-    other wise return value
-    */
-    try {
-        let json_value = JSON.parse(query_str_value)
-        if (
-            typeof json_value === 'object' &&
-            !Array.isArray(json_value) &&
-            json_value !== null
-        ) {
-            return json_value
-        } else {
-            return {'eq': json_value }
-        }
-
-    } catch (e) {
-        return  {'eq': String( query_str_value ) }
-    }
-}
 
 function AssembleWhereQueryObject(where_object, col_name, json_object) {
     /*
@@ -267,7 +295,7 @@ module.exports = {
     'ParseParamDvalUrl': ParseParamDvalUrl,
     'ParseIdUrl': ParseIdUrl,
     'ParsePageUrl': ParsePageUrl,
-    'IsJsonObject': IsJsonObject,
+    // 'IsJsonObject': IsJsonObject,
     'AssembleWhereQueryObject': AssembleWhereQueryObject,
     'IsValidArray': IsValidArray,
     'GetJsonFromUrl': GetJsonFromUrl,

@@ -42,3 +42,5 @@ test('Where string with json parse', () => {
 
     expect(x).toEqual([{'variable_name':'y',"value":'5', "operator":"lt"}]) 
 });
+
+// test('Parse Query Value')
