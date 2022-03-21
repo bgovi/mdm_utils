@@ -139,6 +139,7 @@ function ParseQval(query_value) {
     if (query_keys.length === 0) {return {}}
     for(var i =0; i<query_keys.length; i++) {
         if (! operators.includes(query_keys[i]) ) {continue}
+
         if (Array.isArray(json_object[query_keys[i]])) {
             json_object_out[query_keys[i]] = StringifyArray( json_object[query_keys[i]] )
         } else {
@@ -181,14 +182,25 @@ function ParseWhereUrl(where_parameters, where_object){
     where_parameters = [{'column_name': {'eq':value}, ... ]
 
     */
-    let query_keys = Object.keys(where_parameters)
-    for(var i =0; i < query_keys.length; i++) {
-        let qkey  = query_keys[i]
-        let qval  = where_parameters[qkey]
-        //if key not valid skip
-        if (! idk.valid_identifier(qkey)) { continue }
-        //check key is valid
-        AssembleWhereQueryObject(where_object, qkey,qval)
+    try {
+        let json_string = RJSON.transform(where_parameters)
+        let jx = JSON.parse(json_string)
+        for(var i =0; i < jx.length; i++) {
+            let query_keys = Object.keys(jx[i])
+            for (var j = 0; j < query_keys.length; j++) {
+                let qkey  = query_keys[j]
+                let qval  = jx[i][qkey]
+                if (! idk.valid_identifier(qkey)) { continue }
+                //check key is valid
+                let qval2 = ParseQval(qval) //returns object
+                if (Object.keys(qval2) === 0 ) {continue}
+                AssembleWhereQueryObject(where_object, qkey, qval2)
+            }
+        }
+    }
+
+    catch (e) {
+        console.log(e)
     }
 }
 
