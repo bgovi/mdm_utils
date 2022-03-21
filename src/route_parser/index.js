@@ -6,7 +6,10 @@ add schema and column name checking here.
 Need restricted schema names:
 */
 
-const id_check = require('../indentifier_check')
+const id_check   = require('./indentifier_check')
+const url_parse  = require('./url_parse')
+const pload      = require('./payload')
+const jwtutil    = require('./jwt_util')
 
 
 var op_names = [ "help", "map", "search", "select", "insert",
@@ -60,6 +63,9 @@ function ExtractNodeId(data_row) {
     }
 
 }
+
+
+//default pagination
 
 
 //url vs post route precedence

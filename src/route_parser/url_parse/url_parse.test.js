@@ -63,3 +63,5 @@ test('Parse .id.', () => {
     let y = x['id']
     expect(y).toEqual( '1'  ) 
 });
+
+/* check for invalid identifiers */

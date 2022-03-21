@@ -49,7 +49,7 @@ var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between',
 
 
 
-function ParseUrlQuery(req_query) {
+function ParseUrlQuery(req_query, max_limit=100000) {
     /*
     req_query is object or is string. If object expected to come from payload.
     dont use req_query object parse string directly so uniform between nodejs and javascript
@@ -72,7 +72,7 @@ function ParseUrlQuery(req_query) {
         let qkey  = decodeURIComponent(query_keys[i])
         let qval  = decodeURIComponent(req_query[qkey])
         if (restricted_keys.includes(qkey)) {
-            ParseSpecialKeys(qkey, qval,where_object, page_object, sort_object, config_object)
+            ParseSpecialKeys(qkey, qval,where_object, page_object, sort_object, config_object, max_limit)
         }
         else {
             //if key not valid skip
@@ -163,24 +163,22 @@ function IsObject(json_object) {
 }
 
 
-function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object, config_object) {
+function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object, config_object, max_limit) {
     /*
-    {'.sort.': jsonObject}
+    Used to parse url query that uses the special name flags below
     [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
-
-
     */
     if (url_key === ".sort." ) { ParseSortUrl(qval, sort_object) }
     else if ( url_key === ".where." ) { ParseWhereUrl(qval, where_object) }
     else if ( url_key === ".param." || url_key === ".dval." ) { ParseParamDvalUrl(url_key,qval, config_object)} 
     else if ( url_key === ".id." ) { ParseIdUrl(qval, config_object) } 
-    else if ( url_key === ".limit." || url_key === ".offset." ) { ParsePageUrl(url_key, qval, page_object) }
+    else if ( url_key === ".limit." || url_key === ".offset." ) { ParsePageUrl(url_key, qval, page_object, max_limit=max_limit) }
 }
 
 function ParseWhereUrl(where_parameters, where_object){
     /*
+    Used to parse .where.=
     where_parameters = [{'column_name': {'eq':value}, ... ]
-
     */
     try {
         let json_string = RJSON.transform(where_parameters)
@@ -233,9 +231,8 @@ function ParseSortUrl(sort_params, sort_object){
     } catch (e) {
         console.log(e)
     }
-
-
 }
+
 function ParseParamDvalUrl(url_key,p_params, config_object){
     /*
         .param. =[{'column_name': value}]  //for parameters calls
@@ -260,11 +257,10 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
     } catch (e) {
         console.log(e)
     }
-
-
 }
 
 function ParseIdUrl(qval, config_object){ config_object['id'] = String(qval) }
+
 function ParsePageUrl(url_key, qval, page_object, max_limit = 100000){
     try {
         let yint = parseInt(qval)
@@ -327,6 +323,7 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
 }
 
 function IsValidArray(array_object, len_min = -1, len_max=-1) {
+    //checks if object is an array and has the correct size
     if (! Array.isArray(array_object) ) {return false}
     else if ( len_min > -1 && len_max > -1 ) {
         if (array_object.length <= len_max && array_object.length >= len_min) {return true}
@@ -346,6 +343,7 @@ function IsValidArray(array_object, len_min = -1, len_max=-1) {
 }
 
 function StringifyArray(array_object) {
+    //All values in the array are converted to strings
     let new_array = []
     for( var i=0; i<array_object.length; i++) {
         new_array.push(String(array_object[i]))
