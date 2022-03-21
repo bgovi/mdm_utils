@@ -5,7 +5,8 @@ is used as a filter in the where statement. All column names must be check colum
 ?column_name=value //this gets converted to ('eq':value)
 ?column_name=json_object (from bellow)
 
-{'in':[values]}
+%7B and %7D for {}
+{'in':[values]} //if from json string use %5B and %5D instead of [] for url safe 
 {'not_in':[values]}
 {'lt':value}
 {'gt':value}
@@ -41,7 +42,7 @@ const idk   = require('../indentifier_check')
 const RJSON = require('relaxed-json') 
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
-var operators = ['in', 'not_in', 'lt', 'gt', 'between', 'not_between', 'eq', 'neq']
+var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq']
 
 
 //for client side need wrapper to parse into req_query form
@@ -50,14 +51,15 @@ var operators = ['in', 'not_in', 'lt', 'gt', 'between', 'not_between', 'eq', 'ne
 
 function ParseUrlQuery(req_query) {
     /*
-    req_query is object or is string
-
+    req_query is object or is string. If object expected to come from payload.
+    dont use req_query object parse string directly so uniform between nodejs and javascript
 
 
     */
     if (typeof req_query === 'string') {
         req_query = GetJsonFromUrl(req_query)
     }
+    //make sure parsed from req query?
 
     //modify url string to req_query object or do nothing
     let query_keys = Object.keys(req_query)
@@ -84,6 +86,26 @@ function ParseUrlQuery(req_query) {
     return url_query_object
 }
 
+function GetJsonFromUrl(url_string) {
+    /*
+    Parses query string into 
+    */
+    let q = url_string
+    if (q.length === 0) { return {} }
+    if (q.charAt(0) === '?') {q = q.substr(1) }
+
+    var result = {};
+    q.split("&").forEach(function(part) {
+      var item = part.split("=");
+      result[decodeURIComponent(item[0])] = decodeURIComponent(item[1])
+    });
+    return result;
+}
+
+
+
+
+
 function ParseQval(query_value) {
     /*
     query_value can be a string. A string as json or an object
@@ -91,6 +113,7 @@ function ParseQval(query_value) {
     other wise return value
     */
    let json_object = {}
+
    if (typeof query_value === 'string') {
        try {
         let json_string = RJSON.transform(query_value)
@@ -111,10 +134,18 @@ function ParseQval(query_value) {
         else { json_object = {'eq': String( query_value ) } }
     }
 
+    let json_object_out = {}
     let query_keys = Object.keys(json_object)
     if (query_keys.length === 0) {return {}}
-    if (! operators.includes(query_keys[0]) ) {return {}}
-    return json_object
+    for(var i =0; i<query_keys.length; i++) {
+        if (! operators.includes(query_keys[i]) ) {continue}
+        if (Array.isArray(json_object[query_keys[i]])) {
+            json_object_out[query_keys[i]] = StringifyArray( json_object[query_keys[i]] )
+        } else {
+            json_object_out[query_keys[i]] = String( json_object[query_keys[i]] )
+        }
+    }
+    return json_object_out
 
 }
 
@@ -128,23 +159,6 @@ function IsObject(json_object) {
         return false
     }
 
-}
-
-
-function GetJsonFromUrl(url_string) {
-    /*
-    Parses query string into 
-    */
-    let q = url_string
-    if (q.length === 0) { return {} }
-    if (q.charAt(0) === '?') {q = q.substr(1) }
-
-    var result = {};
-    q.split("&").forEach(function(part) {
-      var item = part.split("=");
-      result[decodeURIComponent(item[0])] = decodeURIComponent(item[1])
-    });
-    return result;
 }
 
 
@@ -222,10 +236,8 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
     //force everything to a string?
 
     */
-    console.log('hi')
-    console.log(json_object)
-   let key = Object.keys(json_object)[0]
-   let value = json_object[key]
+    let key = Object.keys(json_object)[0]
+    let value = json_object[key]
     // console.log(key)
     // console.log(value)
 
@@ -247,22 +259,25 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
     } else if ('le' === key) {
         where_object.push( {'variable_name': col_name, 'operator': 'le', 'value':  String(value) })        
     } else if ('between' === key ) {
-        if (IsValidArray(value), len_min =2, len_max=2 ) {
+        if (IsValidArray(value, len_min =2, len_max=2 ) ) {
             where_object.push( {'variable_name': col_name, 'operator': 'between', 'value':  StringifyArray(value) })
         }
     } else if ('not_between' === key ) {
-        if (IsValidArray(value), len_min =2, len_max=2 ) {
+        if (IsValidArray(value, len_min =2, len_max=2 ) ) {
             where_object.push( {'variable_name': col_name, 'operator': 'not_between', 'value':  StringifyArray(value) })
         }
     } else if ('eq' === key ) {
         where_object.push( {'variable_name': col_name, 'operator': 'eq', 'value':  String(value) })
+    } else if ('neq' === key ) {
+        where_object.push( {'variable_name': col_name, 'operator': 'neq', 'value':  String(value) })
     }
 }
 
 function IsValidArray(array_object, len_min = -1, len_max=-1) {
     if (! Array.isArray(array_object) ) {return false}
     else if ( len_min > -1 && len_max > -1 ) {
-
+        if (array_object.length <= len_max && array_object.length >= len_min) {return true}
+        else{return false}
     }
 
     else if ( len_min > -1 ) {

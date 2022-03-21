@@ -4,43 +4,41 @@
 */
 const up = require('./index.js')
 
-// test('Parse query string starts with ?', () => {
-//     let url_string = "?x=1&y={'lt':5}"
-//     expect(up.GetJsonFromUrl(url_string)
-//     ).toMatchObject({'x': '1', 'y':"{'lt':5}"}) 
-// });
-
-// test('Parse query string', () => {
-//     let url_string = "x=1&y={'lt':5}&z={'in':[1,2,3]}"
-//     expect(up.GetJsonFromUrl(url_string)
-//     ).toMatchObject({'x': '1', 'y':"{'lt':5}", "z":"{'in':[1,2,3]}" }) 
-// });
-
-// test('Parse Url Query string', () => {
-//     // let url_string = "x=1&y={'lt':5}"
-//     let url_string = "x=1"
-//     let x = up.ParseUrlQuery(url_string)
-//     console.log(x)
-
-//     expect(x).toEqual([{'variable_name':'x',"value":'1', "operator":"eq"}]) 
-// });
-
-// test('Where string with equivalency statement', () => {
-//     // let url_string = "x=1&y={'lt':5}"
-//     let qkey = "col"
-//     let url_string = "x=1&y=5"
-//     let x = up.ParseUrlQuery(url_string)['where']
-
-//     expect(x).toEqual([{'variable_name':'x',"value":'1', "operator":"eq"},{'variable_name':'y',"value":'5', "operator":"eq"}]) 
-// });
-
-test('Where string with json parse', () => {
+test('Parse Url Query string', () => {
     // let url_string = "y={'lt':5}"
     let qkey = "col"
-    let url_string = "y={lt:5}"
+    // let url_string = "y={lt:5}&x='abc'"
+    let url_string = "y=%7Blt:5%7D&x='abc'&z={neq:def}&xin={in:%5B 1,2,3 %5D}&xb={between:%5B 1,2 %5D}"
+
     let x = up.ParseUrlQuery(url_string)['where']
 
-    expect(x).toEqual([{'variable_name':'y',"value":'5', "operator":"lt"}]) 
+    expect(x).toEqual([
+        {'variable_name':'y',"value":'5', "operator":"lt"},
+        {'variable_name':'x',"value":"'abc'", "operator":"eq"},
+        {'variable_name':'z',"value":"def", "operator":"neq"},
+        {'variable_name':'xin',"value":["1","2","3"], "operator":"in"},
+        {'variable_name':'xb',"value":["1","2"], "operator":"between"},
+    
+    
+    ]) 
 });
 
-// test('Parse Query Value')
+// test('Parse Query Configurations')
+test('Parse Query Configurations', () => {
+    // let url_string = "y={'lt':5}"
+    let qkey = "col"
+    // let url_string = "y={lt:5}&x='abc'"
+    let url_string = "y=%7Blt:5%7D&x='abc'&z={neq:def}&xin={in:%5B 1,2,3 %5D}&xb={between:%5B 1,2 %5D}"
+
+    let x = up.ParseUrlQuery(url_string)['where']
+
+    expect(x).toEqual([
+        {'variable_name':'y',"value":'5', "operator":"lt"},
+        {'variable_name':'x',"value":"'abc'", "operator":"eq"},
+        {'variable_name':'z',"value":"def", "operator":"neq"},
+        {'variable_name':'xin',"value":["1","2","3"], "operator":"in"},
+        {'variable_name':'xb',"value":["1","2"], "operator":"between"},
+    
+    
+    ]) 
+});
