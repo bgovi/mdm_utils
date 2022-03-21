@@ -208,18 +208,33 @@ function ParseSortUrl(sort_params, sort_object){
     /*
     .sort.  =[{'column_name': 'asc'},{'column_name': 'desc'} ] //for sorting
     */
-    let query_keys = Object.keys(sort_params)
-    for(var i =0; i < query_keys.length; i++) {
-        let qkey  = query_keys[i]
-        let qval  = String(sort_params[qkey]).trim()
-        //if key not valid skip
-        if (! idk.valid_identifier(qkey)) { continue }
-        if (qval === 'asc' || qval === 'd') {
-            sort_object.push({qkey:'asc'})
-        } else if (qval === 'desc' || qval === 'd') {
-            sort_object.push({qkey:'desc'})
+    try {
+        let json_string = RJSON.transform(sort_params)
+        let jx = JSON.parse(json_string)
+        let x = {}
+        for(var i =0 ; i<jx.length; i++) {
+            let query_keys = Object.keys(jx[i])
+            for(var j =0; j < query_keys.length; j++) {
+                let qkey  = query_keys[j]
+                let qval  = String(jx[i][qkey])
+                //if key not valid skip
+                if (! idk.valid_identifier(qkey)) { continue }
+                if (qval === 'asc' || qval === 'a') {
+                    let y = {}
+                    y[qkey] = 'asc'
+                    sort_object.push(y)
+                } else if (qval === 'desc' || qval === 'd') {
+                    let y = {}
+                    y[qkey] = 'desc'
+                    sort_object.push(y)
+                }
+            }
         }
+    } catch (e) {
+        console.log(e)
     }
+
+
 }
 function ParseParamDvalUrl(url_key,p_params, config_object){
     /*

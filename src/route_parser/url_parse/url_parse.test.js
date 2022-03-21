@@ -43,12 +43,26 @@ const up = require('./index.js')
 //     expect(y).toEqual( {'x':5, 'y':'a', 'z':['a','b','c'] }  ) 
 // });
 
-test('Parse .dval. Query Configurations', () => {
-    let url_string = ".dval.=[ {'x': 5 }, {'y': 'a'}, {'z': [1,2,'3'] } ]"
-    let x = up.ParseUrlQuery(url_string)['config']
-    let y = x['dval']
-    expect(y).toEqual( {'x':5, 'y':'a', 'z':[1,2,'3'] }  ) 
+// test('Parse .dval. Query Configurations', () => {
+//     let url_string = ".dval.=[ {'x': 5 }, {'y': 'a'}, {'z': [1,2,'3'] } ]"
+//     let x = up.ParseUrlQuery(url_string)['config']
+//     let y = x['dval']
+//     expect(y).toEqual( {'x':5, 'y':'a', 'z':[1,2,'3'] }  ) 
+// });
+
+test('Parse .sort. Query Configurations', () => {
+    let url_string = ".sort.=[{'a': 'asc'},{'b': 'desc'}, {'c': 'a'} ]"
+    let x = up.ParseUrlQuery(url_string)['sort']
+    console.log(x)
+    expect(x).toEqual( [{a:'asc'}, {b:'desc'}, {c: 'asc'}]  ) 
 });
+
+
+// .sort.  = [{'column_name': 'asc'},{'column_name': 'desc'} ]
+
+// .id. = value  //id of route
+// .limit.=value //pagination limit
+// .offset.=value //pagination offset
 
 
 // .param. =[{'column_name': value}]  //for parameters calls
