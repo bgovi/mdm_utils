@@ -24,14 +24,32 @@ const up = require('./index.js')
 // });
 
 // test('Parse Query Configurations')
-test('Parse .where. Query Configurations', () => {
-    let url_string = ".where.=[ {'x': 5 }, {'y': 7}, {'z': {'in':['a','b','c']} } ]"
-    let x = up.ParseUrlQuery(url_string)['where']
+// test('Parse .where. Query Configurations', () => {
+//     let url_string = ".where.=[ {'x': 5 }, {'y': 7}, {'z': {'in':['a','b','c']} } ]"
+//     let x = up.ParseUrlQuery(url_string)['where']
 
-    expect(x).toEqual([
-        {'variable_name':'x',"value":'5', "operator":"eq"},
-        {'variable_name':'y',"value":'7', "operator":"eq"},
-        {'variable_name':'z',"value":['a','b','c'], "operator":"in"}    
+//     expect(x).toEqual([
+//         {'variable_name':'x',"value":'5', "operator":"eq"},
+//         {'variable_name':'y',"value":'7', "operator":"eq"},
+//         {'variable_name':'z',"value":['a','b','c'], "operator":"in"}    
     
-    ]) 
+//     ]) 
+// });
+
+// test('Parse .param. Query Configurations', () => {
+//     let url_string = ".param.=[ {'x': 5 }, {'y': 'a'}, {'z': ['a','b','c'] } ]"
+//     let x = up.ParseUrlQuery(url_string)['config']
+//     let y = x['param']
+//     expect(y).toEqual( {'x':5, 'y':'a', 'z':['a','b','c'] }  ) 
+// });
+
+test('Parse .dval. Query Configurations', () => {
+    let url_string = ".dval.=[ {'x': 5 }, {'y': 'a'}, {'z': [1,2,'3'] } ]"
+    let x = up.ParseUrlQuery(url_string)['config']
+    let y = x['dval']
+    expect(y).toEqual( {'x':5, 'y':'a', 'z':[1,2,'3'] }  ) 
 });
+
+
+// .param. =[{'column_name': value}]  //for parameters calls
+// .dval.  = [{'column_name': value}] //default values instead of null

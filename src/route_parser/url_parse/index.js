@@ -66,7 +66,7 @@ function ParseUrlQuery(req_query) {
     let where_object  = []
     let page_object   = {} //id //limit
     let sort_object   = []
-    let config_object = {".param.":{},".dval.": {} ,".id.": {} }  
+    let config_object = {"param":{},"dval": {} ,"id": {} }  
     for(var i =0; i < query_keys.length; i++) {
         //check valid key
         let qkey  = decodeURIComponent(query_keys[i])
@@ -226,20 +226,31 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
         .param. =[{'column_name': value}]  //for parameters calls
         .dval.  = [{'column_name': value}] //default values instead of null
     */
-    let x = {}
-    let query_keys = Object.keys(p_params)
-    for(var i =0; i < query_keys.length; i++) {
-        let qkey  = query_keys[i]
-        let qval  = p_params[qkey]
-        //if key not valid skip
-        if (! idk.valid_identifier(qkey)) { continue }
-        x[qkey] = qval
+    try {
+        let json_string = RJSON.transform(p_params)
+        let jx = JSON.parse(json_string)
+        let x = {}
+        for(var i =0 ; i<jx.length; i++) {
+            let query_keys = Object.keys(jx[i])
+            for(var j =0; j < query_keys.length; j++) {
+                let qkey  = query_keys[j]
+                let qval  = jx[i][qkey]
+                //if key not valid skip
+                if (! idk.valid_identifier(qkey)) { continue }
+                x[qkey] = qval
+            }
+
+        }
+        config_object[url_key.replaceAll(".","")] = x
+    } catch (e) {
+        console.log(e)
     }
-    config_object[url_key.replace(".","")] = x
+
+
 }
 
 function ParseIdUrl(qval, config_object){ config_object['id'] = qval }
-function ParsePageUrl(url_key, qval, page_object){ page_object[url_key.replace(".","")] = qval }
+function ParsePageUrl(url_key, qval, page_object){ page_object[url_key.replaceAll(".","")] = qval }
 
 
 function AssembleWhereQueryObject(where_object, col_name, json_object) {
