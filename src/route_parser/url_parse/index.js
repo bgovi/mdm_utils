@@ -66,7 +66,7 @@ function ParseUrlQuery(req_query) {
     let where_object  = []
     let page_object   = {} //id //limit
     let sort_object   = []
-    let config_object = {"param":{},"dval": {} ,"id": {} }  
+    let config_object = {"param":{},"dval": {} ,"id": null }  
     for(var i =0; i < query_keys.length; i++) {
         //check valid key
         let qkey  = decodeURIComponent(query_keys[i])
@@ -264,8 +264,23 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
 
 }
 
-function ParseIdUrl(qval, config_object){ config_object['id'] = qval }
-function ParsePageUrl(url_key, qval, page_object){ page_object[url_key.replaceAll(".","")] = qval }
+function ParseIdUrl(qval, config_object){ config_object['id'] = String(qval) }
+function ParsePageUrl(url_key, qval, page_object, max_limit = 100000){
+    try {
+        let yint = parseInt(qval)
+        if (! Number.isInteger(yint)) {yint = -1}
+        if (url_key === '.limit.') {
+            if (yint < 0 ) { yint = max_limit}
+            else if (yint > max_limit) {yint = max_limit}
+            page_object[url_key.replaceAll(".","")] = String(yint)
+        } else if (url_key === '.offset.') {
+            if (yint < 0 ) { yint = 0}
+            page_object[url_key.replaceAll(".","")] = String(yint)
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
 
 
 function AssembleWhereQueryObject(where_object, col_name, json_object) {
