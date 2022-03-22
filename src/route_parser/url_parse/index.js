@@ -6,7 +6,8 @@ is used as a filter in the where statement. All column names must be check colum
 ?column_name=json_object (from bellow)
 
 %7B and %7D for {}
-{'in':[values]} //if from json string use %5B and %5D instead of [] for url safe 
+%5B and %5D instead of [] for url safe
+{'in':[values]} //if from json string use 
 {'not_in':[values]}
 {'lt':value}
 {'gt':value}
@@ -17,6 +18,7 @@ is used as a filter in the where statement. All column names must be check colum
 
 These are special key names that are parsed in a customized way.
 .sort.  =[{'column_name': 'asc'},{'column_name': 'desc'} ] //for sorting can use a or d for short
+.corder. = ['column1','column2'] //order for grid
 .where. =[{'column_name': {'eq':value} ] //for filtering
 .param. =[{'column_name': value}]  //for parameters calls
 .dval.  = [{'column_name': value}] //default values instead of null
@@ -42,7 +44,7 @@ const idk   = require('../indentifier_check')
 const RJSON = require('relaxed-json') 
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
-var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq']
+var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike']
 
 
 //for client side need wrapper to parse into req_query form
@@ -66,7 +68,7 @@ function ParseUrlQuery(req_query, max_limit=100000) {
     let where_object  = []
     let page_object   = {} //id //limit
     let sort_object   = []
-    let config_object = {"param":{},"dval": {} ,"id": null }  
+    let config_object = {"param":{},"dval": {} ,"id": null, 'corder': [] }  
     for(var i =0; i < query_keys.length; i++) {
         //check valid key
         let qkey  = decodeURIComponent(query_keys[i])
@@ -88,7 +90,7 @@ function ParseUrlQuery(req_query, max_limit=100000) {
 
 function GetJsonFromUrl(url_string) {
     /*
-    Parses query string into 
+    Parses query string into javascript object
     */
     let q = url_string
     if (q.length === 0) { return {} }
@@ -173,6 +175,26 @@ function ParseSpecialKeys(url_key, qval, where_object, page_object, sort_object,
     else if ( url_key === ".param." || url_key === ".dval." ) { ParseParamDvalUrl(url_key,qval, config_object)} 
     else if ( url_key === ".id." ) { ParseIdUrl(qval, config_object) } 
     else if ( url_key === ".limit." || url_key === ".offset." ) { ParsePageUrl(url_key, qval, page_object, max_limit=max_limit) }
+    else if (url_key === '.corder.') {ParseColumnOrder(qval, config_object) }
+}
+
+function ParseColumnOrder(c_param, config_object){
+
+    try {
+        let json_string = RJSON.transform(c_param)
+        let jx = JSON.parse(json_string)
+        if (! Array.isArray(jx)) {return}
+        for(var i =0 ; i<jx.length; i++) {
+            let cname = String(jx[i])
+            if (! idk.valid_identifier(cname)) { continue }
+            config_object["corder"] = cname
+        }
+    } catch (e) {
+        console.log(e)
+    }
+
+
+
 }
 
 function ParseWhereUrl(where_parameters, where_object){
@@ -319,6 +341,10 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
         where_object.push( {'variable_name': col_name, 'operator': 'eq', 'value':  String(value) })
     } else if ('neq' === key ) {
         where_object.push( {'variable_name': col_name, 'operator': 'neq', 'value':  String(value) })
+    } else if ('like' === key ) {
+        where_object.push( {'variable_name': col_name, 'operator': 'like', 'value':  String(value) })
+    } else if ('ilike' === key ) {
+        where_object.push( {'variable_name': col_name, 'operator': 'ilike', 'value':  String(value) })
     }
 }
 
