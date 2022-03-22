@@ -1,3 +1,5 @@
 /*
 For help query.
+
+Query to get columns and types and comments.
 */

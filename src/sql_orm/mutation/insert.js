@@ -23,6 +23,7 @@ let insert_params = [{
 }]
 
 */
+const rp = require('../../route_parser')
 
 
 let insert_params = [{
@@ -37,9 +38,28 @@ function insert_statement(schema_name, table_name, row_data, insert_params) {
     /*
     Batch size?
     */
+    //if on conflict or on restraint
+
+    rp.valid_identifier
+
+    for (const key of Object.keys(row_data) )
+
+
+    //check_row_data has valid identifier
+    //check on_conflict and or on_constraint is valid identifier
+
+    return { "query": `INSERT INTO "${schema_name}"."${table_name}" ${columns} VALUES ${values}`, "params": [row_id] }
+
+    //returning?
 
 }
 
+function upsert_statement (schema_name, table_name, row_data, insert_params) {
+
+    
+
+
+}
 
 
 function parameter_generator(row_data) {
@@ -68,29 +88,6 @@ function append_raw_value() {
 }
 
 
-function extract_column(row_data){
-//ignore list
-    column_fields = []
-    if (Array.isArray(row_data) ){
-
-        if (row_data.length >= 0) {
-            if (typeof row_data !== 'object') { return column_fields }
-            __extract_column__(row_data[0], column_fields)
-            return column_fields
-        } else {
-            return column_fields
-        }
-    } else if ( typeof row_data === 'object') {
-        __extract_column__(row_data, column_fields)
-    }
-    return column_fields
-}
-
-function __extract_column__(row_data, column_fields) {
-    for (const [key, value] of Object.entries(object1)) {
-        columns.push[key]
-    }
-}
 
 //create $1 and default values?
 //onconflicts?

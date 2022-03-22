@@ -1,0 +1,17 @@
+/*
+Placeholder for parsing grid configuration
+
+url_params
+column_defs
+non editable fields
+data_type
+
+add types for expected params and default values from url.
+
+
+grid_id imports
+
+by id or name
+
+.colmn. #for column order
+*/

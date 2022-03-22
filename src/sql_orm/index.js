@@ -53,3 +53,9 @@ convert data and query params to array of objects if
 error_handling?
 
 */
+function CreateTransaction(query, params, session_user_id) {
+
+    let trans = `BEGIN; SET LOCAL app.user_id='${session_user_id}'; ${query}; COMMIT;`
+
+
+}
