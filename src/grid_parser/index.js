@@ -15,3 +15,10 @@ by id or name
 
 .colmn. #for column order
 */
+
+/*
+route used to pull configurations for raw table
+
+pull columns: all fields are editable except 
+special columns
+*/
