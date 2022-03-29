@@ -33,7 +33,7 @@ let insert_params = [{
     "default_fields": "",
     "on_conflict": "",
     "on_constraint": "",
-    "do": "", //nothing or update
+    "do_nothing": "", //nothing or update
     "set_fields": "",
     "returning": ""
 }]
@@ -59,36 +59,34 @@ function insert_statement(schema_name, table_name, row_data, insert_params) {
         parameter_generator(column_name, cvalue, place_holder, values, v_index, def_object, columns)
     }
 
-    let set_fields = []
+    let insert_string = `INSERT INTO "${schema_name}"."${table_name}" ${columns} VALUES ${place_holder}`
     let return_string = rs.ReturningStr(insert_params['returning'])
+
     //if onconflict or on_restraint append set
     if (insert_params['on_conflict'] && insert_params['set_fields']) {
         let conflict_name = insert_params['on_conflict']
         rp.CheckIdentifierError(conflict_name)
-        `ON CONFLICT ("${conflict_name}")` 
+        let const_str = `ON CONFLICT ("${conflict_name}")` 
+        let set_str = set_generator(insert_params['set_fields'])
+        if (set_str === "" ) {
 
+        } else {
+
+        }
+
+        return {"text": `${insert_string} ${return_string}`, "values": values } 
 
         //onconflict is valid
 
     } else if (insert_params['on_constraint'] && insert_params['set_fields'] ) {
-        //oncontraint is valid
 
-    } else {
+        let constraint_name = insert_params['on_constraint']
+        rp.CheckIdentifierError(conflict_name)
+        let const_str = `ON CONFLICT ON CONSTRAINT ("${constraint_name}")`
+        let set_str = set_generator(insert_params['set_fields'])
+        return {"text": `${insert_string} ${return_string}`, "values": values } 
 
-    }
-
-
-    return { "text": `INSERT INTO "${schema_name}"."${table_name}" ${columns} VALUES ${place_holder}`, "values": values }
-
-    //returning
-
-}
-
-function on_conflict (schema_name, table_name, row_data, insert_params) {
-
-}
-
-function on_contratint (schema_name, table_name, row_data, insert_params) {
+    } else { return { "text": `${insert_string} ${return_string}`, "values": values } }
 
 }
 
@@ -106,14 +104,21 @@ function parameter_generator(column_name, cvalue, place_holder, values, v_index,
     }
 }
 
-function set_generator(row_data) {
-    let params = []
-    let placeholder = []
-    let i = 1
-    for (const [key, value] of Object.entries(object1)) {
-        console.log(`${key}: ${value}`);
-        params.push(value)
-        placeholder.push(`${i}`)
-        i+=1
-      }
+function set_generator(set_fields) {
+    let sx = []
+    for (var i = 0; i<set_fields.length; i++) {
+        let cname = set_fields[i]
+        rp.CheckIdentifierError(cname)
+        sx.push(`"${cname}" = EXCLUDED."${cname}"`)
+    }
+    if (sx.length > 0 ) {
+        let set_string = "UPDATE " + sx.join(" , ")
+        return set_string
+    } else {
+        return "DO NOTHING"
+    }
+}
+
+module.exports = {
+    'insert_statement': insert_statement
 }
