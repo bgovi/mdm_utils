@@ -59,3 +59,5 @@ function CreateTransaction(query, params, session_user_id) {
 
 
 }
+
+//AssembleStatement
