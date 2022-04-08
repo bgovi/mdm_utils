@@ -104,6 +104,12 @@ function is_reserved_column(column_name) {
     return false
 }
 
+function is_reserved_column_error(column_name) {
+    if (is_reserved_column(column_name)) {
+        throw new Error(`${column_name} is reserved key word. reserved names are ${reserved_columns}`)
+    }
+}
+
 
 
 /*
@@ -144,6 +150,7 @@ function return_output(schema_name, table_name,crud_type,output, is_error=false,
 
 module.exports = {
     'is_reserved_column': is_reserved_column,
+    'is_reserved_column_error': is_reserved_column_error,
     'return_valid_default_value': return_valid_default_value,
     'return_output': return_output,
     'default_object': default_object

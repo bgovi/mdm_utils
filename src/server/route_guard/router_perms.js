@@ -13,6 +13,17 @@ async function ExtractUserId(req) {
         return req['body']['user_id']
 }
 
+function CrudNotAllowed(crud_name, table_name, route_name, row_node_id, row_id) {
+    //used to return json object when crud operation is not permissiable. used when allow_* is false
+    var err_msg = `${crud_name} not allowed for ${table_name} table. in route ${route_name} for client row ${row_node_id}`
+    if (crud_name == 'updated' || crud_name == 'delete') {
+        err_msg += '. Row can be deactivated  by setting is_active to false to prevent further use and to hide.'
+    }
+    //if update or delete
+    return srf.ModifyFail (row_node_id,  row_id, err_msg)
+}
+
+
 
 async function RoutePermissions(schema_name, table_name, crud_type, user_session, postgres_schema, postgres_table ) {
     /*

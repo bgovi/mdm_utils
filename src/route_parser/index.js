@@ -64,11 +64,21 @@ function ExtractNodeId(data_row) {
 
 }
 
-function IsReservedOrInvalidColumn(column_name) {
+function IsReservedOrInvalidColumn(column_name, throw_error = false) {
     let x = String(column_name)
-    if (id_check.valid_identifier(x) && (!pload.is_reserved_column(x)) ) {return true}
-    else{return false}
+    if (!id_check.valid_identifier(x) || (pload.is_reserved_column(x)) ) {
+        
+        if (throw_error) {
+            id_check.check_identifier_error(x)
+            pload.is_reserved_column_error(x)
+            throw new Error (`${x} is not a valid identifier`)
+        } else {
+            return true
+        }
+    }
+    else{ return false }
 }
+
 
 
 //default pagination
