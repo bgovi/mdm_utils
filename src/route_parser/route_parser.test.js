@@ -3,9 +3,6 @@ Used to test module
 */
 const rp = require('./index.js')
 
-
-
-
 test('route_parser library import', () => {
     expect(true).toBe(true);
 });
@@ -31,9 +28,6 @@ test('Is not reserved column error', () =>
         expect(() => { rp.IsReservedOrInvalidColumn(column_name, true) } ).not.toThrow()
     }  
 );
-
-
-
 
 test('Is reserved column error', () => 
     {
