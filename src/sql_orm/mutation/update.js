@@ -62,7 +62,9 @@ function extract_parameters(row_data, update_params) {
         let rx = Object.keys(row_data)
         for( var i = 0; i< rx.length; i++) {
             let cn = String(rx[i])
-            if (!rp.IsReservedOrInvalidColumn(cn) ) { set_fields.push(`${cn}`) }
+            if (rp.IsReservedColumn(cn) ) {continue}
+            rp.CheckIdentifierError(cn)
+            set_fields.push(`${cn}`)
         }
     }
     return {'default_object': def_object, 'set_fields': set_fields}
