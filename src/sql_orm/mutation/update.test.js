@@ -14,11 +14,8 @@ test('valid update statement', () =>
 
 test('error on no id column', () => 
     {
-        let uxs = ux.update_statement('schema_name', 'table_name', {'col1': 'a', 'id': '1', 'col2': 'b'})
-        let query = `UPDATE "schema_name"."table_name" SET "col1" = $1 , "col2" = $2 WHERE "id" = $3 RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","b", "1"] }
-        console.log(uxs)
-        expect(uxs).toStrictEqual(res_object)
+        let args = {'col1': 'a', 'col2': 'b'}
+        expect(() => { ux.update_statement('schema_name', 'table_name', args)}).toThrow()
     }
 );
 
