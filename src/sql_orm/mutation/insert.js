@@ -29,15 +29,6 @@ const sutil = require('../../sutils')
 // IsReservedColumn
 
 
-let insert_params = [{
-    "default_fields": "",
-    "on_conflict": "",
-    "on_constraint": "",
-    "do_nothing": "", //nothing or update
-    "set_fields": ""
-}]
-
-
 function insert_statement(schema_name, table_name, row_data, init_insert_params, return_param = "id", return_options = null) {
     /*
     Batch size?
@@ -51,7 +42,8 @@ function insert_statement(schema_name, table_name, row_data, init_insert_params,
     let insert_cv_string     = _insert_statement_params(row_data, insert_params, values)
     let constraint_string    = on_contraint(row_data, insert_params)
     let returning_string     = rs.ReturningStr(return_param, return_options)
-    let query = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string} ${constraint_string} ${returning_string}`.trim()
+    let query1 = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string} ${constraint_string}`.trim()
+    let query  = `${query1} ${returning_string}`.trim()
 
     return { "text": query, "values": values } 
 }
@@ -67,9 +59,39 @@ function ParseInsertParams(init_params, row_data) {
     if (! sutil.IsObject(init_params) ) { return insert_params }
     ParseDefaultAndSetFields(insert_params, init_params, row_data)
     ParseConflictFields(insert_params, init_params)
+    return insert_params
 }
 
-function ParseDefaultAndSetFields(insert_params, init_params) {
+function ParseConflictFields(insert_params, init_params) {
+
+    if (init_params.hasOwnProperty("on_conflict")) { 
+        let dx = init_params["on_conflict"]
+        if (sutil.IsObject(dx) ) {
+            insert_params['default_fields'] = rp.DefaultObject(dx)
+        } 
+    }
+
+    if (init_params.hasOwnProperty("on_constraint")) { 
+        let dx = init_params["on_constraint"]
+        if (sutil.IsObject(dx) ) {
+            insert_params['default_fields'] = rp.DefaultObject(dx)
+        } 
+    }
+
+    if (init_params.hasOwnProperty("do_nothing")) { 
+        let dx = init_params["do_nothing"]
+        if (sutil.IsObject(dx) ) {
+            insert_params['default_fields'] = rp.DefaultObject(dx)
+        } 
+    }
+
+
+
+
+}
+
+
+function ParseDefaultAndSetFields(insert_params, init_params, row_data) {
     /*
         Determines values for set. Also determines if default_values can be used as a replacement when
         column value is set to null
@@ -102,7 +124,6 @@ function ParseDefaultAndSetFields(insert_params, init_params) {
 function _insert_statement_params(row_data, insert_params, values ) {
     let vplaceholder = []
     let columns = []
-    let values = []
     let i = 1
 
     let def_object = insert_params['default_fields']
@@ -113,14 +134,14 @@ function _insert_statement_params(row_data, insert_params, values ) {
         let cvalue = row_data[column_name]
 
         if (def_object.hasOwnProperty(column_name) && cvalue === null ) {
-            columns.push(column_name)
+            columns.push(`"${column_name}"`)
             vplaceholder.push(def_object[column_name])
         } else {
             let pholder = `$${i}`
             i += 1
             vplaceholder.push(pholder)
-            columns.push(column_name)
-            values.push(cvalue)
+            columns.push(`"${column_name}"`)
+            values.push(String(cvalue) )
         }
     }
     let cstring = columns.join(" , ")
@@ -129,8 +150,9 @@ function _insert_statement_params(row_data, insert_params, values ) {
 }
 
 //upsert
-function on_contraint() {
+function on_contraint(row_data, insert_params) {
     //if onconflict or on_restraint append set
+    console.log(insert_params)
     let set_str = set_generator(insert_params['set_fields'])
     if (insert_params['on_conflict'] != "") {
         let conflict_name = insert_params['on_conflict']
