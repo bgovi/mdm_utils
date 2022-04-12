@@ -35,13 +35,26 @@ function IsValidOperation(operation_name) {
     schema_name/function_name/execute
     schema_name/function_name/help
     */
-    if (! op_names.includes(operation_name))  {
+    if (! op_names.includes(operation_name.toLowerCase()))  {
         throw new Error(error_string + String(operation_name))
     }
+    return operation_name.toLowerCase()
 }
 
-function CheckRestrictedSchema(schema_name) {
-    return
+//restrict system and administrative views
+var restricted_schemas = [
+    'pg_toast', 'pg_temp_1', 'pg_toast_temp_1',
+    'pg_catalog', 'information_schema',
+    'pg_temp_3', 'pg_toast_temp_3', 'pg_temp_2', 'pg_toast_temp_2'
+    // 'public'
+]
+
+
+
+function CheckRestrictedSchema(schema_name) { 
+    if (restricted_schemas.includes(schema_name)) {
+        throw new Error(String(schema_name) + " is a restricted schema" )
+    }
 }
 
 function IsValidSchemaObjectCrud(schema_name, object_name, operation_name){
@@ -51,6 +64,7 @@ function IsValidSchemaObjectCrud(schema_name, object_name, operation_name){
     id_check.CheckIdentifierError(object_name)
     id_check.CheckIdentifierError(operation_name)
     IsValidOperation(operation_name)
+    return operation_name.toLowerCase()
 }
 
 
@@ -97,5 +111,6 @@ module.exports = {
     "IsReservedOrInvalidColumn": IsReservedOrInvalidColumn,
     "IsReservedColumn": pload.IsReservedColumn,
     'DefaultObject': pload.DefaultObject,
-    'ReturnOutput': pload.ReturnOutput
+    'ReturnOutput': pload.ReturnOutput,
+    'CheckRestrictedSchema': CheckRestrictedSchema
 }
