@@ -41,7 +41,8 @@ encodeURIComponent
 decodeURIComponent
 */
 const idk   = require('../indentifier_check')
-const RJSON = require('relaxed-json') 
+const RJSON = require('relaxed-json')
+const sutil = require('../../sutils')
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
 var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike']
@@ -78,7 +79,7 @@ function ParseUrlQuery(req_query, max_limit=100000) {
         }
         else {
             //if key not valid skip
-            if (! idk.valid_identifier(qkey)) { continue }
+            if (! idk.ValidIdentifier(qkey)) { continue }
             let qval2 = ParseQval(qval) //returns object
             if (Object.keys(qval2) === 0 ) {continue}
             AssembleWhereQueryObject(where_object, qkey, qval2)
@@ -120,7 +121,7 @@ function ParseQval(query_value) {
        try {
         let json_string = RJSON.transform(query_value)
         let jx = JSON.parse(json_string)
-        if (IsObject(jx)) {
+        if (sutil.IsObject(jx)) {
             json_object = jx
         } else {
             json_object = {'eq': String( query_value ) }
@@ -132,7 +133,7 @@ function ParseQval(query_value) {
         json_object = {'eq': String( query_value ) }
     } 
     else {
-        if (IsObject(query_value)) { json_object = query_value }
+        if (sutil.IsObject(query_value)) { json_object = query_value }
         else { json_object = {'eq': String( query_value ) } }
     }
 
@@ -142,25 +143,13 @@ function ParseQval(query_value) {
     for(var i =0; i<query_keys.length; i++) {
         if (! operators.includes(query_keys[i]) ) {continue}
 
-        if (Array.isArray(json_object[query_keys[i]])) {
+        if (sutil.IsArray(json_object[query_keys[i]])) {
             json_object_out[query_keys[i]] = StringifyArray( json_object[query_keys[i]] )
         } else {
             json_object_out[query_keys[i]] = String( json_object[query_keys[i]] )
         }
     }
     return json_object_out
-
-}
-
-function IsObject(json_object) {
-    //check if object
-    if (
-        typeof json_object === 'object' &&
-        !Array.isArray(json_object) &&
-        json_object !== null
-    ) {return true} else {
-        return false
-    }
 
 }
 
@@ -183,10 +172,10 @@ function ParseColumnOrder(c_param, config_object){
     try {
         let json_string = RJSON.transform(c_param)
         let jx = JSON.parse(json_string)
-        if (! Array.isArray(jx)) {return}
+        if (! sutil.IsArray(jx)) {return}
         for(var i =0 ; i<jx.length; i++) {
             let cname = String(jx[i])
-            if (! idk.valid_identifier(cname)) { continue }
+            if (! idk.ValidIdentifier(cname)) { continue }
             config_object["corder"] = cname
         }
     } catch (e) {
@@ -210,7 +199,7 @@ function ParseWhereUrl(where_parameters, where_object){
             for (var j = 0; j < query_keys.length; j++) {
                 let qkey  = query_keys[j]
                 let qval  = jx[i][qkey]
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 //check key is valid
                 let qval2 = ParseQval(qval) //returns object
                 if (Object.keys(qval2) === 0 ) {continue}
@@ -238,7 +227,7 @@ function ParseSortUrl(sort_params, sort_object){
                 let qkey  = query_keys[j]
                 let qval  = String(jx[i][qkey])
                 //if key not valid skip
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 if (qval === 'asc' || qval === 'a') {
                     let y = {}
                     y[qkey] = 'asc'
@@ -270,7 +259,7 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
                 let qkey  = query_keys[j]
                 let qval  = jx[i][qkey]
                 //if key not valid skip
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 x[qkey] = qval
             }
 
@@ -350,7 +339,7 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
 
 function IsValidArray(array_object, len_min = -1, len_max=-1) {
     //checks if object is an array and has the correct size
-    if (! Array.isArray(array_object) ) {return false}
+    if (! sutil.IsArray(array_object) ) {return false}
     else if ( len_min > -1 && len_max > -1 ) {
         if (array_object.length <= len_max && array_object.length >= len_min) {return true}
         else{return false}

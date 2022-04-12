@@ -1,7 +1,3 @@
-/*
-
-
-*/
 const up = require('./index.js')
 
 test('Parse Url Query string', () => {
