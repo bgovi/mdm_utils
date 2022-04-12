@@ -1,7 +1,9 @@
 
 function execute_statement(schema_name, function_name, row_data, is_select=false) {
     /*
-    Batch size?
+    Row data should be converted to json string
+
+
     */
     //if on conflict or on restraint
     if (is_select) {

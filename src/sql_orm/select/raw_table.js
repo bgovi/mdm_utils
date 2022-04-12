@@ -1,4 +1,0 @@
-/*
-route used to pull configurations for raw table
-
-*/
