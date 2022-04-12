@@ -4,12 +4,18 @@ function IsObject (x) {
 }
 
 function IsString (x) {
-    if (typeof myVar === 'string' || myVar instanceof String) {return true}
+    if (typeof x === 'string' || x instanceof String) {return true}
     else { return false }
 }
 
 function IsArray (x) {
     return Array.isArray(x)    
+}
+
+function IsBoolean (x) {
+
+    if (typeof x == "boolean") { return true }
+    else { return false}
 }
 
 //ToPgArray
@@ -32,5 +38,6 @@ function ArrayToSubQuery (x) {
 module.exports = {
     'IsObject': IsObject,
     'IsString': IsString,
-    'IsArray': IsArray
+    'IsArray': IsArray,
+    'IsBoolean': IsBoolean
 }

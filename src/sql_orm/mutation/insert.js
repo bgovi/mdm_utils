@@ -15,12 +15,12 @@ set default set null
 
 payload (null as default)
 
-let insert_params = [{
+let insert_params = {
     "default_fields": "",
     "on_conflict": "",
     "on_constraint": "",
     "set_fields": ""
-}]
+}
 
 */
 const rp = require('../../route_parser')
@@ -40,7 +40,7 @@ function insert_statement(schema_name, table_name, row_data, init_insert_params,
     let insert_params = ParseInsertParams(init_insert_params, row_data)
 
     let insert_cv_string     = _insert_statement_params(row_data, insert_params, values)
-    let constraint_string    = on_contraint(row_data, insert_params)
+    let constraint_string    = on_contraint(insert_params)
     let returning_string     = rs.ReturningStr(return_param, return_options)
     let query1 = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string} ${constraint_string}`.trim()
     let query  = `${query1} ${returning_string}`.trim()
@@ -66,28 +66,24 @@ function ParseConflictFields(insert_params, init_params) {
 
     if (init_params.hasOwnProperty("on_conflict")) { 
         let dx = init_params["on_conflict"]
-        if (sutil.IsObject(dx) ) {
-            insert_params['default_fields'] = rp.DefaultObject(dx)
+        if (sutil.IsString(dx) && dx !== "" ) {
+            rp.CheckIdentifierError(dx)
+            insert_params['on_conflict'] = dx
         } 
     }
 
     if (init_params.hasOwnProperty("on_constraint")) { 
         let dx = init_params["on_constraint"]
-        if (sutil.IsObject(dx) ) {
-            insert_params['default_fields'] = rp.DefaultObject(dx)
+        if (sutil.IsString(dx) && dx !== "" ) {
+            rp.CheckIdentifierError(dx)
+            insert_params['on_constraint'] = dx
         } 
     }
 
-    if (init_params.hasOwnProperty("do_nothing")) { 
+    if (init_params.hasOwnProperty("do_nothing")) {
         let dx = init_params["do_nothing"]
-        if (sutil.IsObject(dx) ) {
-            insert_params['default_fields'] = rp.DefaultObject(dx)
-        } 
+        if (sutil.IsBoolean(dx) ) { insert_params['do_nothing'] = dx } 
     }
-
-
-
-
 }
 
 
@@ -103,22 +99,34 @@ function ParseDefaultAndSetFields(insert_params, init_params, row_data) {
             insert_params['default_fields'] = rp.DefaultObject(dx)
         } 
     }
-    if ( init_params.hasOwnProperty('set_fields')) {
-        let sx = update_params['set_fields']
-        if (Array.isArray(sx) ) {
-            for( var i = 0; i< sx; i++) {
-                let cn = String(sx[i])
-                rp.IsReservedOrInvalidColumn(cn,true)
-                if (row_data.hasOwnProperty(cn)) {
-                    set_fields.push(`${cn}`)
-                } else {
-                    let row_keys = row_data.keys()
-                    throw new Error(`${cn} not in row_data fields ${row_keys}`)
-                }
-            }
+    if ( ! init_params.hasOwnProperty('set_fields')) { return }
+
+    let sx = init_params['set_fields']
+    if (sutil.IsString(sx)) {
+        if (sx.trim() === "") {
             insert_params['set_fields'] = set_fields
+            return
+        }
+        rp.IsReservedOrInvalidColumn(sx,true)
+        if (row_data.hasOwnProperty(sx)) {
+            set_fields.push(`${sx}`)
+        } else {
+            let row_keys = row_data.keys()
+            throw new Error(`${cn} not in row_data fields ${row_keys}`)
+        }
+    } else if (Array.isArray(sx) ) {
+        for( var i = 0; i< sx.length; i++) {
+            let cn = String(sx[i])
+            rp.IsReservedOrInvalidColumn(cn,true)
+            if (row_data.hasOwnProperty(cn)) {
+                set_fields.push(`${cn}`)
+            } else {
+                let row_keys = row_data.keys()
+                throw new Error(`${cn} not in row_data fields ${row_keys}`)
+            }
         }
     }
+    insert_params['set_fields'] = set_fields
 }
 
 function _insert_statement_params(row_data, insert_params, values ) {
@@ -150,9 +158,8 @@ function _insert_statement_params(row_data, insert_params, values ) {
 }
 
 //upsert
-function on_contraint(row_data, insert_params) {
+function on_contraint(insert_params) {
     //if onconflict or on_restraint append set
-    console.log(insert_params)
     let set_str = set_generator(insert_params['set_fields'])
     if (insert_params['on_conflict'] != "") {
         let conflict_name = insert_params['on_conflict']
@@ -162,10 +169,10 @@ function on_contraint(row_data, insert_params) {
     } else if (insert_params['on_constraint'] != "" ) {
 
         let constraint_name = insert_params['on_constraint']
-        rp.CheckIdentifierError(conflict_name)
+        rp.CheckIdentifierError(constraint_name)
         let const_str = `ON CONFLICT ON CONSTRAINT "${constraint_name}"`
         return `${const_str} ${set_str}`
-    } else if (insert_params['do_nothing']) { return "DO NOTHING" }
+    } else if (insert_params['do_nothing']) { return "ON CONFLICT DO NOTHING" }
     else { return "" }
 }
 
@@ -176,6 +183,7 @@ function set_generator(set_fields) {
         rp.CheckIdentifierError(cname)
         sx.push(`"${cname}" = EXCLUDED."${cname}"`)
     }
+
     if (sx.length > 0 ) {
         let set_string = "UPDATE SET " + sx.join(" , ")
         return set_string
