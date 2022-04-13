@@ -2,38 +2,37 @@
 test replacement and bind parameter generation
 */
 
-//BasicType
 const bp = require('./index.js')
+//BasicType
+test('$ basic type', () => 
+    {
+        let values = []
+        let res    = bp.AddBindParameters('cx', 1, {}, values, 1, '$', array_type = null)
+        res['values'] = values
+        let x = { pholder: '$1', new_index: 2, values: [ '1' ] }
+        expect(res).toStrictEqual(x)
+    }
+);
 
-// test('$ basic type', () => 
-//     {
-//         let values = []
-//         let res    = bp.AddBindParameters('cx', 1, {}, values, 1, '$', array_type = null)
-//         res['values'] = values
-//         let x = { pholder: '$1', new_index: 2, values: [ '1' ] }
-//         expect(res).toStrictEqual(x)
-//     }
-// );
+test('? basic type', () => 
+    {
+        let values = []
+        let res    = bp.AddBindParameters('cx', 1, {}, values, 1, '?', array_type = null)
+        res['values'] = values
+        let x = { pholder: '?', new_index: 2, values: [ '1' ] }
+        expect(res).toStrictEqual(x)
+    }
+);
 
-// test('? basic type', () => 
-//     {
-//         let values = []
-//         let res    = bp.AddBindParameters('cx', 1, {}, values, 1, '?', array_type = null)
-//         res['values'] = values
-//         let x = { pholder: '?', new_index: 2, values: [ '1' ] }
-//         expect(res).toStrictEqual(x)
-//     }
-// );
-
-// test(': basic type', () => 
-//     {
-//         let values = {}
-//         let res    = bp.AddBindParameters('cx', 'abc', {}, values, 2, ':', array_type = null)
-//         res['values'] = values
-//         let x = { pholder: ':cx_2', new_index: 3, values: {'cx_2': 'abc'} }
-//         expect(res).toStrictEqual(x)
-//     }
-// );
+test(': basic type', () => 
+    {
+        let values = {}
+        let res    = bp.AddBindParameters('cx', 'abc', {}, values, 2, ':', array_type = null)
+        res['values'] = values
+        let x = { pholder: ':cx_2', new_index: 3, values: {'cx_2': 'abc'} }
+        expect(res).toStrictEqual(x)
+    }
+);
 
 //Array
 test(': array type a', () => 
@@ -66,15 +65,24 @@ test('$ array type ?', () =>
     }
 );
 
+//Default
+test('Default parameter', () => 
+    {
+        let values = []
+        let res    = bp.AddBindParameters('cx', null , { 'cx': 'default' }, values, 1, '?')
+        res['values'] = values
+        let x = { pholder: 'default', new_index: 1, values: [] }
+        expect(res).toStrictEqual(x)
+    }
+);
 
-// test('$ basic type', () => 
-//     {
-
-//         let values = []
-//         let res    = bp.AddBindParameters('cx', 1, {}, values, 1, '$', array_type = null)
-//         res['values'] = values
-//         console.log(res)
-//         expect(true).toBe(true)
-//         .toStrictEqual
-//     }
-// );
+//Object
+test('Object Type', () => 
+    {
+        let values = []
+        let res    = bp.AddBindParameters('cx', {'a': '1'} , {  }, values, 1, '?')
+        res['values'] = values
+        let x = { pholder: '?', new_index: 2, values: ['{"a":"1"}'] }
+        expect(res).toStrictEqual(x)
+    }
+);

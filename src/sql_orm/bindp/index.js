@@ -2,10 +2,8 @@
 This is responsible for generating placeholder string and bind parameters
 
 The Main function is AddBindParameters
-
-
-
 */
+
 const sutil = require('../../sutils')
 
 function AddBindParameters(column_name, column_value, default_object, values, index, bind_type, array_type = null) {
@@ -61,7 +59,7 @@ function AddBindParameters(column_name, column_value, default_object, values, in
         return {'pholder': pholder, 'new_index': new_index }
     }
     else if (sutil.IsObject(column_value)) {
-        let string_value = String(column_value)
+        let string_value = JSON.stringify(column_value)
         let pholder      = CreatePlaceHolder(column_name, index, bind_type)
         let new_index    = index + 1
         AppendValues(values, string_value, pholder, bind_type  )
