@@ -31,12 +31,12 @@ function AddBindParameters(column_name, column_value, default_object, values, in
         in (i) column_name_$i and $i comes from the index value
     array_type: Only for situations where the column_value is a javascript array.
         Example cx = [1,2,3]. cx is column_name and the array is column_value. example index i = 1 and bind_type is $
-        if array_type is null returns string $1, $2, $3
-        if array_type is 'a' returns ARRAY [ $1, $2, $3 ]
-        if array_type is 's' returns ( $1, $2, $3 )
+        if array_type is null returns string $1,$2,$3
+        if array_type is 'a' returns ARRAY[ $1,$2,$3 ]
+        if array_type is 's' returns ( $1,$2,$3 )
 
         For replacements
-            [ ?, ?, ? ] or [ :column_name_$1 , :column_name_$2 , :column_name_$3  ]
+            [ ?, ?, ? ] or [ :column_name_1 , :column_name_2 , :column_name_3  ]
 
     Modifies:
         values. the replacements values are appened to the values array/object.
