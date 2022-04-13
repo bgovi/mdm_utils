@@ -1,0 +1,3 @@
+/*
+test replacement and bind parameter generation
+*/
