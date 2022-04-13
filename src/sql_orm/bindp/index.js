@@ -69,8 +69,8 @@ function AddBindParameters(column_name, column_value, default_object, values, in
 
     } else if (sutil.IsArray(column_value)) {
         let x = ArrayToStr (column_name, column_value, index, bind_type )
-        AppendValues(values, x.string_values, x.pholders, bind_type  )
-        return {'string_value': x.string_values, 'pholder': WrapArray(x.pholders, array_type) , 'new_index': x.new_index }
+        AppendValues(values, x.string_value, x.pholder, bind_type  )
+        return {'pholder': WrapArray(x.pholder, array_type) , 'new_index': x.new_index }
 
     } else {
         throw new Error (`${column_name} is of unknown type`)
@@ -80,7 +80,7 @@ function AddBindParameters(column_name, column_value, default_object, values, in
 function WrapArray(pholders, array_type) {
     let xs = String(pholders)
     if (array_type == null ) { return xs }
-    else if (array_type == 'a') { return `ARRAY[ ${xs}  ]` }
+    else if (array_type == 'a') { return `ARRAY[ ${xs} ]` }
     else if (array_type == 's' ) { return `( ${xs} )` }
     else { throw new Error (`Invalid array wrapper specified: ${array_type}`) }
 }
@@ -118,7 +118,7 @@ function ArrayToStr (column_name, column_value_array, index, bind_type ) {
 
 function StringifyArray (x) {
     let y = []
-    for(var i =0; i<x.length; i++) { y.push(JSON.stringify(x[i])) }
+    for(var i =0; i<x.length; i++) { y.push(String(x[i])) }
     return y
 }
 
