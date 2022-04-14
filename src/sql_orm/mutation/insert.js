@@ -1,25 +1,12 @@
 /*
 Responsible for creating insert, batch_insert, upsert and batch upsert
 
-pass default values. ignore _updated_at_, _created_at_, _last_modified_by_, id
-
-INSERT INTO schema.table_name (columns) VALUES ( ) RETURNING *;
-
-BatchInsert
-
-Upsert
-
-Batch Insert
-
-set default set null
-
-payload (null as default)
-
 let insert_params = {
     "default_fields": "",
     "on_conflict": "",
     "on_constraint": "",
     "set_fields": ""
+
 }
 
 */
@@ -32,7 +19,18 @@ const bindp = require('../bindp')
 // function UpdateStatement(schema_name, table_name, row_data, values, index, update_params )
 
 //BatchInsert
-
+function BatchInsertStatement(schema_name, table_name, row_data_array,values, index, insert_params ) {
+    if (! sutil.IsArray(row_data_array)) {throw new Error ('row_data_array must be javascript array')}
+    if (! insert_params.hasOwnProperty("batch_insert_row")) {insert_params["batch_insert_row"] = true}
+    let query_output = []
+    for (var i = 0; i < row_data_array.length ; i++) {
+        let row_data = row_data_array[i]
+        let ix = InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
+        index = ix.new_index
+        query_output.push(ix.text)
+    }
+    return { "text": query_output.join(';\n'), "values": values, "new_index": insert_cv_string.new_index } 
+}
 
 function InsertStatement(schema_name, table_name, row_data,values, index, insert_params ){
     /*
@@ -187,8 +185,26 @@ function SetGenerator(set_fields) {
     }
 }
 
+function ExtractAllRowKeys(row_data_array) {
+    let x = {}
+    for (var i = 0; i < row_data_array.length; i++) {
+        let keys = Object.keys(row_data_array[i])
+        for (var j = 0; j < keys.length; j++) { x[keys[i]] = null }
+    }
+    let y = []
+    let xkeys = Object.keys(x)
+    for (var j = 0; j < xkeys.length; j++ ) {
+        let column_name = xkeys[j]
+        rp.CheckIdentifierError(column_name)
+        if( rp.IsReservedColumn(column_name) ) { continue }
+        y.push(column_name)
+    }
+    return y
+}
+
 
 
 module.exports = {
-    'InsertStatement': InsertStatement
+    'InsertStatement': InsertStatement,
+    'BatchInsertStatement': BatchInsertStatement
 }

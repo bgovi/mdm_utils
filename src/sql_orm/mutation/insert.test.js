@@ -96,3 +96,4 @@ test('upsert statement onconflict with set', () =>
     }
 );
 
+//test batch inserts
