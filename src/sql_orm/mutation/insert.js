@@ -44,12 +44,11 @@ function InsertStatement(schema_name, table_name, row_data,values, index, insert
     let params = ParseInsertParams(insert_params, row_data)
 
     let insert_cv_string     = InsertStatementParams(row_data, params, index, values)
-    let constraint_string    = on_contraint(insert_params)
-    let returning_string     = rs.ReturningStr(return_param, return_options)
-    let query1 = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string} ${constraint_string}`.trim()
+    let constraint_string    = OnConstraint(params)
+    let returning_string     = rs.ReturningStr(params.return_param, params.return_options)
+    let query1 = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string.text} ${constraint_string}`.trim()
     let query  = `${query1} ${returning_string}`.trim()
-
-    return { "text": query, "values": values } 
+    return { "text": query, "values": values, "new_index": insert_cv_string.new_index } 
 }
 
 function ParseInsertParams(init_params, row_data) {
@@ -150,13 +149,13 @@ function InsertStatementParams(row_data, params, index,values ) {
         insert_values.push(bparams.pholder)
     }
     let cstring = columns.join(" , ")
-    let vstring = vplaceholder.join(" , ")
-    return `(${cstring}) VALUES (${vstring})`
+    let vstring = insert_values.join(" , ")
+    return {'text':`(${cstring}) VALUES (${vstring})`, 'new_index': index}
 }
 
-function on_contraint(insert_params) {
+function OnConstraint(insert_params) {
     //if onconflict or on_restraint append set
-    let set_str = set_generator(insert_params['set_fields'])
+    let set_str = SetGenerator(insert_params['set_fields'])
     if (insert_params['on_conflict'] != "") {
         let conflict_name = insert_params['on_conflict']
         rp.CheckIdentifierError(conflict_name)
@@ -172,7 +171,7 @@ function on_contraint(insert_params) {
     else { return "" }
 }
 
-function set_generator(set_fields) {
+function SetGenerator(set_fields) {
     let sx = []
     for (var i = 0; i<set_fields.length; i++) {
         let cname = set_fields[i]
@@ -191,5 +190,5 @@ function set_generator(set_fields) {
 
 
 module.exports = {
-    'insert_statement': insert_statement
+    'InsertStatement': InsertStatement
 }

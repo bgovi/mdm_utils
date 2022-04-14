@@ -1,13 +1,24 @@
 const ix = require('./insert.js')
 
-test('valid insert statement', () => 
+// InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
+test('valid insert statement bind_type: $', () => 
     {
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, {} )
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, [], 1, {} )
         let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","1"] }
+        let res_object = { "text": query, "values": ["a","1"], "new_index": 3 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
+
+test('valid insert statement bind_type: :', () => 
+    {
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, {}, 1, {'bind_type': ':'} )
+        let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES (:col1_1 , :Col2_2) RETURNING "id"`
+        let res_object = { "text": query, "values": {"col1_1":"a", "Col2_2":"1"}, "new_index": 3 }
+        expect(ixs).toStrictEqual(res_object)
+    }
+);
+
 
 test('insert statement with default', () => 
     {
@@ -19,9 +30,9 @@ test('insert statement with default', () =>
             "set_fields": ""
         }
 
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': null}, insert_params )
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': null}, [], 1, insert_params )
         let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , default) RETURNING "id"`
-        let res_object = { "text": query, "values": ["a"] }
+        let res_object = { "text": query, "values": ["a"], "new_index": 2 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
@@ -35,9 +46,9 @@ test('insert on error do nothing', () =>
             "set_fields": "",
             "do_nothing": true
         }
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, insert_params )
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, [], 1, insert_params )
         let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) ON CONFLICT DO NOTHING RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","1"] }
+        let res_object = { "text": query, "values": ["a","1"], "new_index": 3 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
@@ -49,9 +60,9 @@ test('upsert statement onconflict with set', () =>
             "on_conflict": "col1",
             "set_fields": "Col2"
         }
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, insert_params )
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1},[], 1, insert_params )
         let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) ON CONFLICT ("col1") UPDATE SET "Col2" = EXCLUDED."Col2" RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","1"] }
+        let res_object = { "text": query, "values": ["a","1"], "new_index": 3 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
@@ -60,12 +71,13 @@ test('upsert statement onconflict DO NOTHING', () =>
     {
         let insert_params = {
             "default_fields": {'Col2': 'default'},
-            "on_conflict": "col1"
+            "on_conflict": "col1",
+            'bind_type': '?'
             // "set_fields": "Col2"
         }
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, insert_params )
-        let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) ON CONFLICT ("col1") DO NOTHING RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","1"] }
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, [], 1, insert_params )
+        let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES (? , ?) ON CONFLICT ("col1") DO NOTHING RETURNING "id"`
+        let res_object = { "text": query, "values": ["a","1"], "new_index": 3 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
@@ -77,14 +89,10 @@ test('upsert statement onconflict with set', () =>
             "on_constraint": "col1",
             "set_fields": ["Col2"]
         }
-        let ixs = ix.insert_statement('schema_name', 'table_name', {'col1': 'a', 'Col2': null}, insert_params )
+        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': null},[], 1, insert_params )
         let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , default) ON CONFLICT ON CONSTRAINT "col1" UPDATE SET "Col2" = EXCLUDED."Col2" RETURNING "id"`
-        let res_object = { "text": query, "values": ["a"] }
+        let res_object = { "text": query, "values": ["a"], "new_index": 2 }
         expect(ixs).toStrictEqual(res_object)
     }
 );
 
-/*
-Repeat with replacements
-
-*/
