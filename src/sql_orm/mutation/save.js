@@ -4,13 +4,6 @@ This module handles all of the primary crud operations.
 CRUD Operations API. Below are common input parameters used for the crud opeartions: Insert, Update, Upsert, Delete. Save is
 a wrapper function for these fields
 
-
-
-*/
-const ix = require('./insert.js')
-const dx = require('./delete.js')
-const ux = require('./update')
-
 // {
 //     "crud_type": "", //only needed for save route 
 //     "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
@@ -25,6 +18,12 @@ const ux = require('./update')
 //     "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
 //     "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
 // }
+
+*/
+const ix = require('./insert.js')
+const dx = require('./delete.js')
+const ux = require('./update')
+const sutil = require('../../sutils')
 
 //values or replacements
 async function Save(req, res, route_model, table_name, route_name, update_filter, saveParams){
@@ -84,32 +83,4 @@ async function Execute(req, rowx, route_model, table_name, route_name, saveParam
     /*
     may add delete conditions to where statement?
     */
-}
-
-
-
-
-
-async function GetSequelize(req, res, route_model, query_clause, table_name, route_name) {
-    /*
-    uses sequelize to generate get route
-
-    query_arguments: {parameters to send to sequelize} i.e. attribtues: where, raw: true, include
-
-    Model.findAll({
-    where: {
-        [Op.and]: [
-            Sequelize.literal('RAW SQL STATEMENT WHICH WONT BE ESCAPED!!!')
-        ]
-    }
-    })
-    //extract pagination??
-    //maybe pass function and creqte
-    */
-    try {
-        var rows = await route_model.findAll(query_clause) //active users i.e. Admin, User, New
-        res.json(srf.QuerySuccess(rows, table_name, route_name))
-    } catch (err) {
-        res.json(srf.QueryError(srf.ProcessError(err), table_name, route_name))
-    }
 }
