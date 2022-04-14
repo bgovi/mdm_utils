@@ -1,19 +1,9 @@
 /*
 Responsible for creating delete statement with replacement operations. 
+Each row is required to have an id column.
 
-pass default values. ignore _updated_at_, _created_at_, _last_modified_by_, id
-
-INSERT INTO schema.table_name (columns) VALUES ( ) RETURNING *;
-
-BatchInsert
-
-Upsert
-
-Batch Insert
-
-set default set null
-
-payload (null as default)
+DeleteStatement: Actual delete statement
+DeleteAtStatement: Uses update to set a _deleted-at timestamp. Represents paranoid mode.
 */
 const rp = require('../../route_parser')
 const rs = require('./return_str.js')
