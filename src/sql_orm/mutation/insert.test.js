@@ -97,3 +97,14 @@ test('upsert statement onconflict with set', () =>
 );
 
 //test batch inserts
+// BatchInsertStatement(schema_name, table_name, row_data_array,values, index, insert_params )
+test('valid insert statement bind_type: $', () => 
+    {
+        let cx = [{'col1': 'a', 'Col2': 1}, {'col3': 'x'}]
+        let ixs = ix.BatchInsertStatement('schema_name', 'table_name', cx, [], 1, {} )
+        let query = [`INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) RETURNING "id"`,
+            `INSERT INTO "schema_name"."table_name" ("col3") VALUES ($3) RETURNING "id"`]
+        let res_object = { "text": query, "values": ["a","1", 'x'], "new_index": 4 }
+        expect(ixs).toStrictEqual(res_object)
+    }
+);

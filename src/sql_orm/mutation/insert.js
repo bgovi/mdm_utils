@@ -29,7 +29,7 @@ function BatchInsertStatement(schema_name, table_name, row_data_array,values, in
         index = ix.new_index
         query_output.push(ix.text)
     }
-    return { "text": query_output.join(';\n'), "values": values, "new_index": insert_cv_string.new_index } 
+    return { "text": query_output, "values": values, "new_index": index } 
 }
 
 function InsertStatement(schema_name, table_name, row_data,values, index, insert_params ){
