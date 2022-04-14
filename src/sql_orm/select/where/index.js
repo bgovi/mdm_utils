@@ -112,8 +112,6 @@ output: [{}] //list of id, row_node_id and error_msg: '' add error message and f
 */
 //user filter. boolean string for user permissions included in where statement?
 const moment = require('moment')
-const er = require('./extract_req')
-
 //module.exports = {}
 //columnObject = {columnMap, columnList, columnQuickSortString }
 
@@ -159,101 +157,6 @@ function CreateQueryParamaters(req, columnObject) {
 Primary functions for creating assembly strings??
 order_statment = {variable_name: , sort_order: 'asc/desc' }
 */
-//if (variable_name == 'is_read_only') {continue}
-function OuterQuery( where_statements, columnObject, replacementObject ){
-    //make aysnc for promise stuff??
-    var columnMap = columnObject['columnMap']
-    where_list = []
-    for (where_statement of where_statements) {
-        var query_type = where_statement['query_type']
-        var data_type = where_statement['data_type']
-        var variable_name = where_statement['variable_name']
-        //determine where assembly based on query_type and data_type
-        if (['allow_update','allow_delete', 'is_assigned'].includes(variable_name)) {
-            var replacementName = ":"+variable_name
-            var variableValue = where_statement['value']
-            var dataType = where_statement['data_type']
-            //typecast variableValue??? for integer array or string array??
-            if (typeof variableValue !== "boolean") { continue}
-        
-            replacementObject[variable_name] = variableValue
-            var boolean_string = `(${variable_name} = (${replacementName}) )`
-            where_list.push(boolean_string)
-        }
-    }
-    if (where_list.length > 0) {
-        var where_string = 'WHERE ' + where_list.join(' AND ') +'\n'
-        return where_string
-    } else { return '' }
-
-}
-
-
-
-
-
-function OrderClause(order_statements, columnMap) {
-
-    var order_list = []
-    for (order_statement of order_statements) {
-        var columnName = ColumnMapReturn(columnMap, order_statement['variable_name'])
-        if (columnName == null) { continue }
-
-        var sort_order = order_statement['sort_order'].toUpperCase()
-        if (['ASC', 'DESC'].includes(sort_order)) {
-            var ox = `${columnName} ${sort_order}`
-            order_list.push(ox)
-        }
-    }
-    if (order_list.length > 0 ) {
-        var order_string = 'ORDER BY ' + order_list.join(', ') +'\n'
-        return order_string
-    } else { return '' }
-}
-
-function PaginationClause(pagination_values) {
-    //both should be integers?
-    var pagination_data = ExtractPaginationData(pagination_values)
-    var offset = pagination_data['offset']
-    var page_limit = pagination_data['page_limit']
-    return `offset ${offset} limit ${page_limit}`
-}
-
-function ExtractPaginationData(pagination_values) {
-    //both should be integers?
-    var offset = pagination_values['offset']
-    var page_limit = pagination_values['limit']
-    offset = parseInt(offset)
-    page_limit = parseInt(page_limit)
-    if (isNaN(offset)  ) { offset = 0 }
-    if (isNaN(page_limit)  ) { page_limit = 1000 }
-
-    if (offset < 0 ) { offset = 0}
-    if (page_limit <= 0) {page_limit = 1000 }
-    if (page_limit > 10000) {page_limit = 10000 } //max size
-    return {'offset': offset, 'page_limit': page_limit}
-}
-
-function ExtractPaginationDataFromReq(req) {
-    //both should be integers?
-    var req_body = req['body']
-    var pagination_values = req_body['pagination']
-    if (pagination_values === undefined) {
-        return {'offset': 0, 'page_limit': 1000 }        
-    }
-
-    var offset = pagination_values['offset']
-    var page_limit = pagination_values['limit']
-    offset = parseInt(offset)
-    page_limit = parseInt(page_limit)
-    if (isNaN(offset)  ) { offset = 0 }
-    if (isNaN(page_limit)  ) { page_limit = 1000 }
-
-    if (offset < 0 ) { offset = 0}
-    if (page_limit <= 0) {page_limit = 1000 }
-    if (page_limit > 10000) {page_limit = 10000 } //max size
-    return {'offset': offset, 'page_limit': page_limit}
-}
 
 
 //check if json body has all query arguments i.e. where, rules, order_by, pagination
@@ -271,25 +174,6 @@ function CheckPagniation(req_body) { if (! req_body.hasOwnProperty('pagination')
     req_body['pagination'] = [{'offset': 0, 'limit': 1000}]}
 }
 
-//pass in user filter object???
-/*
-    types are: in, date, like, equals, quick_filter, server_query, greater_equal, greater, less, less_equal
-
-    in: the in flag is meant to create a statement like id in (1,2,3,4,5). the value should be a list of values
-    date: the date field expects the value object to be {'before_date': '2020-11-01', 'after_date':'1999-01-01'}
-        the date value is in YYYY-MM-DD format. Either or both before_date and after_date can be present. 
-        the output statement will look like "effective_date >=  '1999-01-01' and effective_date <=  '2020-11-01'
-    like: uses the like operater 'columnName like value or value like columnName'
-    equals: checks 'columnName = value'
-    quick_filter: this is similar to the like clause, but all columns names in the columnMap are concatenated together
-        so that the quick_filter value is compared against all columns in a row.
-
-    greater, greater_equal, less, less_equal, equal: used to compare numerical values. creates bool statement like 'columnName < value'
-
-    server_query: this is a query string generated by the server. If variable_name and value are not null they are added
-        to the replacements object. the string is in the query_string object in the where rows.
-
-*/
 
 
 //create columnObject = {columnMap, columnList, columnConcat}
@@ -340,18 +224,6 @@ function WhereClause( where_statements, columnObject, replacementObject ){
 
 }
 
-/*
-Where Helper functions.
-[{'variable_name': , 'query_type': , 'value':  , 'data_type': ''}]
-
-where_statement
-columnMap
-replacementObject
-where_list
-variableValue:
-
-
-*/
 function WhereDate(where_statement, columnMap, replacementObject, where_list) {
     /*
         {'before_date': YYYY-MM-DD, 'after_date': YYYY-MM-DD}
@@ -526,43 +398,6 @@ function WhereNumericalIn(where_statement, columnMap, replacementObject, where_l
     where_list.push(boolean_string)
 }
 
-function WhereQuickFilter(where_statement,  where_list, replacementObject, quickFilterColumnString) {
-    //loops through all values in variableValue and compares against columns in quickFilterColumnString
-    var variable_value = where_statement['value'] //this will contain the like values as a list.
-    var processedVariableValue = TypeCastValues(variable_value, 'string' )
-    //if variableValue empty, null, undefined or '', skip?
-    if (IsEmptyStatement(processedVariableValue)) {return }
-    //convert to array if single value
-    if (! Array.isArray(processedVariableValue)) { 
-        processedVariableValue = [processedVariableValue]
-        if (! Array.isArray(processedVariableValue)) { return }    
-    }
-
-    if (processedVariableValue.length == 0) {return}
-
-    var likeJoinList = []
-    var i = 0
-    // console.log(processedVariableValue)
-    for (varx of processedVariableValue) {
-        // console.log(varx)
-        varx = varx.trim()
-        // console.log(varx)
-        if (varx == '') { continue }
-        var repName = "quick_sort_" + String(i)
-        // console.log(repName)
-        // console.log(varx)
-        // console.log(replacementObject)
-        replacementObject[repName] = '%'+varx+'%'
-        likeJoinList.push(`${quickFilterColumnString} ilike :${repName}`  )
-        i+=1
-    }
-    if (likeJoinList.length > 0) {
-        var like_string = likeJoinList.join(' OR ')
-        var boolean_string = ` ( ${like_string}  ) `
-        where_list.push(boolean_string)
-    }
-}
-
 
 function WhereStringEqual(where_statement, columnMap, replacementObject, where_list) {
     var variable_name = where_statement['variable_name']
@@ -580,17 +415,6 @@ function WhereStringEqual(where_statement, columnMap, replacementObject, where_l
     replacementObject[variable_name] = processedVariableValue
     var boolean_string = `(${columnName} ilike ${replacementName} )`
     where_list.push(boolean_string)
-}
-
-// server_query: this is a query string generated by the server. If variable_name and value are not null they are added
-// to the replacements object. the string is in the query_string object in the where rows.
-function WhereServerQuery(where_statement, where_list) {
-    /*
-    Query string must be completed before entering in?
-
-    */
-    var sql_string = '(' + where_statement['value'] +')'
-    where_list.push(sql_string)
 }
 
 function WhereNumericalComparision(where_statement, columnMap, replacementObject, where_list) {
