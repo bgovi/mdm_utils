@@ -28,6 +28,30 @@ function IsBoolean (x) {
     else { return false}
 }
 
+function HasId (x) {
+    if (x.hasOwnProperty('id')) {return true}
+    else {return false}
+}
+
+function DefaultParams (x) {
+    //assembles default params object for crud operations.
+    if (! IsObject(x)) {
+        return {
+            return_param: 'id',
+            return_options: null,
+            bind_type: '$',
+            array_type: null
+        }
+    }
+    if (! x.hasOwnProperty('return_param')) { x['return_param'] = 'id' }
+    if (! x.hasOwnProperty('return_option')) { x['return_option'] = null }
+    if (! x.hasOwnProperty('bind_type')) { x['bind_type'] = '$' }
+    return x
+}
+
+function MissingId(row_data, operation) {
+    if (! HasId(row_data)) { throw new Error (`${operation} statements require id. No id given in row ${row_data}`) }
+}
 
 module.exports = {
     'IsObject': IsObject,
@@ -35,5 +59,8 @@ module.exports = {
     'IsArray': IsArray,
     'IsBoolean': IsBoolean,
     'IsNumber': IsNumber,
-    'IsBasicType': IsBasicType
+    'IsBasicType': IsBasicType,
+    'HasId': HasId,
+    'MissingId': MissingId,
+    'DefaultParams': DefaultParams
 }
