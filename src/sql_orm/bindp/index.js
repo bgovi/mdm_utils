@@ -51,6 +51,12 @@ function AddBindParameters(column_name, column_value, default_object, values, in
         let new_index = index
         return {'pholder': pholder, 'new_index': new_index }
     }
+    else if (sutil.IsNull(column_value) ) {
+        // let string_value = default_object[column_name]
+        let pholder = 'null'
+        let new_index = index
+        return {'pholder': pholder, 'new_index': new_index }
+    }
     else if ( sutil.IsBasicType(column_value) ) {
         let string_value = String(column_value)
         let pholder      = CreatePlaceHolder(column_name, index, bind_type)

@@ -8,6 +8,11 @@ function IsString (x) {
     else { return false }
 }
 
+function IsNull(x) {
+    if (x === null) {return true}
+    else{ return false }
+}
+
 function IsNumber (x) {
     if (typeof x == "number") { return true }
     else { return false}
@@ -62,5 +67,6 @@ module.exports = {
     'IsBasicType': IsBasicType,
     'HasId': HasId,
     'MissingId': MissingId,
+    'IsNull': IsNull,
     'DefaultParams': DefaultParams
 }

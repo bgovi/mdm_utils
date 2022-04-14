@@ -34,6 +34,18 @@ test(': basic type', () =>
     }
 );
 
+test('? null type', () => 
+    {
+        let values = []
+        let res    = bp.AddBindParameters('cx', null, {}, values, 1, '?', array_type = null)
+        res['values'] = values
+        let x = { pholder: 'null', new_index: 1, values: [  ] }
+        expect(res).toStrictEqual(x)
+    }
+);
+
+
+
 //Array
 test(': array type a', () => 
     {
