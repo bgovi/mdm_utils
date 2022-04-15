@@ -27,4 +27,20 @@ function BooleanStatement(filter_params, index, values ) {
     }
 }
 
+//makes where in boolean statement i.e. columnName in (values)
+function WhereBoolean(where_statement, columnMap, replacementObject, where_list) {
+    var variable_name = where_statement['variable_name']
+    // var columnName =  columnMap[variable_name]
+    var columnName = ColumnMapReturn(columnMap, variable_name)
+    if (columnName == null) {return}
+    var replacementName = ":"+variable_name
+    var variableValue = where_statement['value']
+    if (typeof variableValue !== 'boolean' ) {return }
+
+    replacementObject[variable_name] = variableValue
+    var boolean_string = `(${columnName} = ${replacementName} )`
+    where_list.push(boolean_string)
+}
+
+
 module.exports = {'BooleanStatement': BooleanStatement}

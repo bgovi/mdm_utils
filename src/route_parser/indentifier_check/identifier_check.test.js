@@ -25,6 +25,11 @@ test('Valid string no error thrown', () => {
   expect(() => ic.CheckIdentifierError('random_name')).not.toThrow();
 });
 
+test('empty string throw error', () => {
+  expect(() => ic.CheckIdentifierError('')).toThrow();
+});
+
+
 test.each(invalid_characters)(
   'Throw Error Invalid Character %s',
   (ident_str) => { expect(() => ic.CheckIdentifierError(ident_str)).toThrow() }

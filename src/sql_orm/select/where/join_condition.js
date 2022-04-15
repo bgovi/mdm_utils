@@ -1,5 +1,8 @@
 //how to join
 
+//// AND	Logical operator AND
+// OR	Logical operator OR
+
 //array of arrays
 /*
 [

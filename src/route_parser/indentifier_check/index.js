@@ -5,7 +5,11 @@ are alpha numeric strings along with underscores.
 No special characters are allowed. This requirement must be enforced to prevent sql injection.
 */
 function ValidIdentifier(ident_str) {
-    //Test string has no special characters. 
+    //Test string has no special characters.
+
+    //if not string
+    //if empty
+    if (ident_str.trim() === 0) {return false}
     return ident_str.match(/^[A-Za-z0-9_]+$/) != null
 }
 

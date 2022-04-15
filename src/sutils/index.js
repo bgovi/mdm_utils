@@ -33,10 +33,19 @@ function IsBoolean (x) {
     else { return false}
 }
 
+//IsDate
+//IsDateTime
+//IsTime
+//DateConvert
+//TimeConvert
+
+
+
 function HasId (x) {
     if (x.hasOwnProperty('id')) {return true}
     else {return false}
 }
+
 
 function DefaultParams (x) {
     //assembles default params object for crud operations.
@@ -58,6 +67,10 @@ function MissingId(row_data, operation) {
     if (! HasId(row_data)) { throw new Error (`${operation} statements require id. No id given in row ${row_data}`) }
 }
 
+function ReturnQuotedColumnName(column_name) {
+    return `"${column_name}"`
+}
+
 module.exports = {
     'IsObject': IsObject,
     'IsString': IsString,
@@ -68,5 +81,6 @@ module.exports = {
     'HasId': HasId,
     'MissingId': MissingId,
     'IsNull': IsNull,
+    'ReturnQuotedColumnName': ReturnQuotedColumnName,
     'DefaultParams': DefaultParams
 }
