@@ -84,15 +84,20 @@ let query_params = [
     "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
     "default_fields": "", //object with default type {x:"default_value_x", y:"default_value_y"}
     "set_fields": "",  //array that has columns that should be used for set
-    "on_conflict": "",
-    "on_constraint": "",
-    "where": "",
-    "page": "", //object {'offset': val, 'limit': val}
+    "on_conflict": "", //string a-zA-Z0-9
+    "on_constraint": "", //string a-zA-Z0-9
+    "where": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
+    "offset": "", //should be integer greater or equal to 0
+    "limit": "", //should be positive integer
     "search_filter": "", //string or object with quick filter type:
     "search_rank": "", //bool
     "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
     "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
-}]
+    }
+]
+
+
+
 
 function IsReservedColumn(column_name) {
     /*
@@ -148,6 +153,10 @@ function ReturnOutput(schema_name, table_name,crud_type,output, is_error=false, 
     }
     return output
 }
+
+
+
+
 
 module.exports = {
     'IsReservedColumn': IsReservedColumn,
