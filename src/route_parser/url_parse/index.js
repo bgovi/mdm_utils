@@ -292,7 +292,7 @@ function ParsePageUrl(url_key, qval, page_object, max_limit = 100000){
 
 function AssembleWhereQueryObject(where_object, col_name, json_object) {
     /*
-    {'variable_name': , 'operator': , value: } how to handle arrays?
+    {'column_name': , 'operator': , value: } how to handle arrays?
     //force everything to a string?
 
     */
@@ -303,37 +303,37 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
 
     if (key === 'in') {
         if (IsValidArray(value), len_min =1 ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'in', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'in', 'value':  StringifyArray(value) })
         }
 
     } else if ('not_in' === key) {
         if (IsValidArray(value), len_min =1 ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) })
         }
     } else if ('gt' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'gt', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'gt', 'value':  String(value) })
     } else if ('ge' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'ge', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'ge', 'value':  String(value) })
     } else if ('lt' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'lt', 'value':  String(value) })        
+        where_object.push( {'column_name': col_name, 'operator': 'lt', 'value':  String(value) })        
     } else if ('le' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'le', 'value':  String(value) })        
+        where_object.push( {'column_name': col_name, 'operator': 'le', 'value':  String(value) })        
     } else if ('between' === key ) {
         if (IsValidArray(value, len_min =2, len_max=2 ) ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'between', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'between', 'value':  StringifyArray(value) })
         }
     } else if ('not_between' === key ) {
         if (IsValidArray(value, len_min =2, len_max=2 ) ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'not_between', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'not_between', 'value':  StringifyArray(value) })
         }
     } else if ('eq' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'eq', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'eq', 'value':  String(value) })
     } else if ('neq' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'neq', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'neq', 'value':  String(value) })
     } else if ('like' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'like', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'like', 'value':  String(value) })
     } else if ('ilike' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'ilike', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'ilike', 'value':  String(value) })
     }
 }
 

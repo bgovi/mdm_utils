@@ -49,18 +49,13 @@ function CrudTypeValid(query_params) {
     InvalidQueryParamError(key)
 }
 function DataTypeValid(query_params, deep_scan = false) {
+    //add empty array?
     let key = 'data'
-    if (!HasKey(query_params, 'crud_type')) {return}
-
-
+    if (!HasKey(query_params, key)) {return}
     if (! sutil.IsArray(data)) {return false }
     if (data.length === 0 ) {return true }
-    if (deep_scan) {
-        if (sutil.IsObject(data[0]) ) {return true }
-    }
-    for (var i = 0; i < data.length; i++) {
-        if (! sutil.IsObject(data[i]) ) {return false }
-    }
+    if (! deep_scan) { if (sutil.IsObject(data[0]) ) {return true } }
+    for (var i = 0; i < data.length; i++) { if (! sutil.IsObject(data[i]) ) {return false } }
     return true
 }
 function DefaultFieldsTypeValid( query_params ) {
