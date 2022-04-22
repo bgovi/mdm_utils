@@ -45,7 +45,30 @@ const RJSON = require('relaxed-json')
 const sutil = require('../../sutils')
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
-var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike']
+var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike',
+
+'similar', 'not_similar', 'is_not_null', 'is_null',
+'like_in', 'not_like_in',
+'ilike_in', 'not_ilike_in'
+
+]
+
+
+// let valid_operators = {'=': '=', '!=': '!=', 
+//     '<>': '<>', '>':'>', '>=': '>=', 
+//     '<': '<', '<=': '<=', 
+//     'lt': '<', 'le':'<=' , 'gt': '>',
+//     'ge': '>=', 'eq': '=', 'neq': '!=',
+//     'in':'in',
+//     'not_in': "NOT IN", 
+//     'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
+//     'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
+//     'not_ilike': "NOT ILIKE",
+//     'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
+//     'is_not_null': "IS NOT NULL",
+//     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
+//     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
+// }
 
 
 //for client side need wrapper to parse into req_query form
