@@ -1,9 +1,12 @@
+/*
+This module handles the search and quickfilter options. search and quick filter utilize the 
+to_tsvector and to_tsquery functionality. (Special character searching does not work in these cases. alphanumeric searching only)
+
+
 // quick_filter: this is similar to the like clause, but all columns names in the columnMap are concatenated together
 //     so that the quick_filter value is compared against all columns in a row.
-/*
+
 Look into pg_trim index
-
-
 https://stackoverflow.com/questions/17691579/removing-a-set-of-letters-from-a-string
 translate('abcdef', 'ace', 'XYZ') --> 'XbYdZf'
 
@@ -63,22 +66,9 @@ Include stop words?
 select to_tsvector('adam') @@  (to_tsquery('simple','a:*')||to_tsquery('bob | steve') );
 
 //use simple if only a few letters?
-
-
-
-//parse into " "
-//
-//Add as query
-
-//similar
-//ilike
-//tsvector with rank
-//
 */
 
-
-const sutil = require('../../sutils')
-const rp = require('../../route_parser')
+const rp = require('../../../../route_parser')
 
 let tsquery_options = {'to_tsquery':'to_tsquery', 'plainto_tsquery':'plainto_tsquery', 
     'phraseto_tsquery':'phraseto_tsquery', 'websearch_to_tsquery':'websearch_to_tsquery',
@@ -87,30 +77,36 @@ let tsquery_options = {'to_tsquery':'to_tsquery', 'plainto_tsquery':'plainto_tsq
     'phraseto_tsquery_simple':'phraseto_tsquery', 'websearch_to_tsquery_simple':'websearch_to_tsquery'
 }
 
-let default_tsq_name = ''
-let default_tsqv_name = ''
-let default_tsqr_name = ''
+//The -- is ilegal using api. So should never conflict
+let default_tsq_name = '--tsq_query--'
+let default_tsqv_name = '--tsqv_vector--'
+let default_tsqr_name = '--tsqr_rank--'
 
 /*
-params: 
-    tsquery_function:
-    tsq_name:
-    tsv_name:
-    tsr_name:
-    is_tsvector:
+Commont parameters:
+query_string_pholder:
+quoted_object_name:
+tsquery_function:
+tsq_name:
+tsv_name:
+tsr_name:
+is_tsvector: (bool)
+
 */
 
-
-
 function CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector=false) {
-    //FROM table_name,
-    // to_tsvector(courses.title || courses.description) document,
-    // to_tsquery('sales') query,
-    // NULLIF(ts_rank(to_tsvector(courses.title), query), 0) rank_title,
-    // NULLIF(ts_rank(to_tsvector(courses.description), query), 0) rank_description,
-    // SIMILARITY('sales', courses.title || courses.description) similarity
-    // WHERE query @@ document OR similarity > 0
-    // ORDER BY rank
+    /*
+    Function creates parameters necessary for creating search functionality. The values should be assembled into a select statement.
+    Below is example of whats returned. Everything below the from statement is used to create search functionality.
+        FROM table_name,
+        to_tsvector(courses.title || courses.description) document,
+        to_tsquery('sales') query,
+        NULLIF(ts_rank(to_tsvector(courses.title), query), 0) rank_title,
+        NULLIF(ts_rank(to_tsvector(courses.description), query), 0) rank_description,
+        SIMILARITY('sales', courses.title || courses.description) similarity
+        WHERE query @@ document OR similarity > 0
+        ORDER BY rank
+    */
     let tsvector = CreateTsVectorCommand(quoted_object_name, tsv_name )
     let tsquery  = CreateTsQueryCommand(tsquery_function, query_string_pholder, tsq_name, is_tsvector)
     let tsrank   = CreateRank(tsv_name, tsq_name, tsr_name )
@@ -120,36 +116,45 @@ function CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_
 }
 
 //need to pass into bool_stmt
-function QuickFilterBoolean(  query_string_pholder, quoted_object_name, tsquery_function  ) {
+function QuickFilterBoolean(  query_string_pholder, quoted_object_name, tsquery_function, is_tsvector = true  ) {
     //tsvector @@ tsquery boolean statement for where filters.
     let tq_cmd = CreateTsQueryCommand(tsquery_function, query_string_pholder)
-    let tv_cmd = CreateTsVectorCommand (quoted_object_name)
+    let tv_cmd = CreateTsVectorCommand (quoted_object_name, "", is_tsvector)
     return ( `${tq_cmd} @@ ${tv_cmd}`  )
 }
 
-
 function CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_name = "") {
     let vn = variable_name
+    console.log(tsquery_function)
+    console.log(query_string_pholder)
+    console.log(variable_name)
+
     if (vn !== "") {rp.CheckIdentifierError(vn)}
     let fn = ReturnTsQueryFunction(tsquery_function)
     let qp = query_string_pholder
-    if (fn.includes('_simple')) {
+    if (tsquery_function.includes('_simple')) {
         //doesnt remove stop words
-        return `${fn}( 'simple', ${qp}) ${vn}`.trim()
+        return `${fn}('simple', ${qp} ) ${vn}`.trim()
     } else {
         //default functions removes stop words
-        return `${fn}( ${qp}) ${vn}`.trim()
+        return `${fn}( ${qp} ) ${vn}`.trim()
     }
 }
 
 function CreateTsVectorCommand (quoted_object_name,  variable_name = "", is_tsvector=false) {
     //column_name or table_name
     let vn = variable_name
+
+    console.log(quoted_object_name)
+    console.log(variable_name)    
+    console.log(is_tsvector)
+
+
     if (vn !== "") {rp.CheckIdentifierError(vn)}
     if (is_tsvector) {
-        return `to_tsvector(${quoted_object_name}::text) ${vn}`.trim()   
+        return `to_tsvector( ${quoted_object_name}::text ) ${vn}`.trim()   
     } else {
-        return `to_tsvector(${quoted_object_name}) ${vn}`.trim()
+        return `to_tsvector( ${quoted_object_name} ) ${vn}`.trim()
     }
 
 }
@@ -167,9 +172,11 @@ function TsQueryStringProcess( query_string ) {
         //replaces space with :* | 
         //the :* with match partial match i.e. a with adam and alex
     */
-    let qx1 = query_string.replace(/[^a-zA-Z0-9 ]/g, "")
-    let qx  = qx1.trim().replace(/\s\s+/g, ':* ')
-    return qx+':*'
+    let qx  = query_string.trim().replace(/\s\s+/g, ' ')
+    let qx1 = qx.replace(/[^a-zA-Z0-9 ]/g, "")
+    let qx2 =qx1.trim().replaceAll(" ", ":* ")
+    if (qx2.trim() !== "") { return qx2 + ":*" }
+    return qx2
 }
 
 function IsSimpleQuery( query_string ) { 
@@ -183,6 +190,7 @@ function IsSimpleQuery( query_string ) {
 
 
 function ReturnTsQueryFunction(tsquery_function) {
+    //returns string representing how to process query string for text search
     if (tsquery_function === null) {return tsquery_options['plainto_tsquery']}
     try { return tsquery_options[tsquery_function] } 
     catch (e) {
@@ -194,5 +202,9 @@ module.exports = {
     "QuickFilterBoolean": QuickFilterBoolean,
     "CreateFullTextSearch": CreateFullTextSearch,
     "IsSimpleQuery": IsSimpleQuery,
-    "TsQueryStringProcess": TsQueryStringProcess
+    "TsQueryStringProcess": TsQueryStringProcess,
+    "ReturnTsQueryFunction": ReturnTsQueryFunction,
+    "CreateTsQueryCommand": CreateTsQueryCommand,
+    "CreateTsVectorCommand": CreateTsVectorCommand,
+    "CreateRank": CreateRank
 }
