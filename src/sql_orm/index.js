@@ -80,14 +80,6 @@ let query_params = [
 */
 function CreateWriteTransaction(query, params, session_user_id) {
     //check session_user_id
-
+    //let query = xyz
     let trans = `BEGIN; SET LOCAL app.user_id='${session_user_id}'; ${query}; COMMIT;`
 }
-
-function CombineUrlAndPostWhereParams() {
-
-}
-
-//if crud
-
-//AssembleStatement

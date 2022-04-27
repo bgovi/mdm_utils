@@ -50,6 +50,23 @@ data_type: string, float, int, etc. Determines what the value type should be in 
 
 */
 
+// function CreateBooleanStatementArray(where_statements, values, bindp) {
+//     //filter_parameter: 'quoted_column_name': "col_name1", 'operator': '=', 'value':  '$1' 
+//     // CreateBooleanStatement(quoted_column_name, operator, placeholder )
+
+// }
+
+// function AssembleWhereClause( boolean_array) {
+
+// }
+
+// function WhereClause(where_statements) {
+//     //boolean array
+//     //where_string
+//     //return
+// }
+
+
 function AssembleWhereStatement(post_body, url_params) {
     // var user_id = req_body['user_id']
     // var columnMap = columnObject['columnMap']

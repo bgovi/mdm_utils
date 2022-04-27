@@ -35,13 +35,13 @@ test('create row level tsvector with name', () =>
         let cn = '"Col1"'
         let vn = '_tsvector_'
         let x = sx.CreateTsVectorCommand (cn,  variable_name = vn, is_tsvector=false)
-        let y = `to_tsvector( "Col1"::text ) ${vn}`
+        let y = `to_tsvector( "Col1"::text ) "${vn}"`
         expect(x).toBe(y)
     }
 );
 
-//to_tsquery
-//CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_name = "")
+// //to_tsquery
+// //CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_name = "")
 test('create to_tsquery', () => 
     { 
         let fn = 'to_tsquery_simple'
@@ -55,16 +55,16 @@ test('create to_tsquery simple parameter', () =>
     { 
         let fn = 'to_tsquery_simple'
         let x = sx.CreateTsQueryCommand (fn, "$1", variable_name = "_tsquery_")
-        let y = `to_tsquery( 'simple', $1 ) _tsquery_`
+        let y = `to_tsquery( 'simple', $1 ) "_tsquery_"`
         expect(x).toBe(y)
     }
 );
 
-//to_tsrank 
+// //to_tsrank 
 test('create to_tsquery simple parameter', () => 
     { 
         let x = sx.CreateRank('__tsquery_name__', '__document_name__', '__ts_rank__')
-        let y = `to_tsrank( __tsquery_name__ , __document_name__ ) __ts_rank__`
+        let y = `to_tsrank( "__tsquery_name__" , "__document_name__" ) "__ts_rank__"`
         expect(x).toBe(y)
     }
 );
@@ -90,7 +90,7 @@ test('create quickfilter boolean statement with text cast', () =>
     }
 );
 
-// CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector=false)
+// // CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector=false)
 test('create full text search creation', () => 
     {
 
@@ -105,12 +105,12 @@ test('create full text search creation', () =>
         let res = sx.CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector)
         let exp ={
             "from": [
-              'to_tsvector( "table1"::text ) __tsqv_name__',
-              'to_tsquery( $1 ) __tsq_name__',
-              'to_tsrank( __tsqv_name__ , __tsq_name__ ) __tsqr_name__'
+              'to_tsvector( "table1"::text ) "__tsqv_name__"',
+              'to_tsquery( $1 ) "__tsq_name__"',
+              'to_tsrank( "__tsqv_name__" , "__tsq_name__" ) "__tsqr_name__"'
             ],
-            "where": '__tsq_name__ @@ __tsqv_name__',
-            "orderby": '__tsqr_name__ DESC'
+            "where": '"__tsq_name__" @@ "__tsqv_name__"',
+            "orderby": '"__tsqr_name__" DESC'
         }
         expect(res).toStrictEqual(exp)
     }

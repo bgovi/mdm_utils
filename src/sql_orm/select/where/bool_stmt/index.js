@@ -75,6 +75,7 @@ function InvalidOperatorError(operator_name) {
     }
 }
 
+
 module.exports = {
     "CreateBooleanStatement": CreateBooleanStatement
 }

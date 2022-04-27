@@ -8,7 +8,7 @@ Return information from pages array
 
 */
 
-//
+//Parse json object.
 
 //pull default json object
 //search postgres

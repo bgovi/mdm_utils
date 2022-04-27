@@ -69,6 +69,7 @@ select to_tsvector('adam') @@  (to_tsquery('simple','a:*')||to_tsquery('bob | st
 */
 
 const rp = require('../../../../route_parser')
+const sutil = require('../../../../sutils')
 
 let tsquery_options = {'to_tsquery':'to_tsquery', 'plainto_tsquery':'plainto_tsquery', 
     'phraseto_tsquery':'phraseto_tsquery', 'websearch_to_tsquery':'websearch_to_tsquery',
@@ -112,6 +113,13 @@ function CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_
     let tsvector = CreateTsVectorCommand(quoted_object_name, tsv_name )
     let tsquery  = CreateTsQueryCommand(tsquery_function, query_string_pholder, tsq_name, is_tsvector)
     let tsrank   = CreateRank(tsv_name, tsq_name, tsr_name )
+
+    //need to wrap names in double quotes.
+    if (tsq_name !== default_tsq_name)  { tsq_name = sutil.ReturnQuotedColumnName(tsq_name) }
+    if (tsv_name !== default_tsqv_name) { tsv_name = sutil.ReturnQuotedColumnName(tsv_name) }
+    if (tsr_name !== default_tsqr_name) { tsr_name = sutil.ReturnQuotedColumnName(tsr_name) }
+
+
     let where_stmt   = `${tsq_name} @@ ${tsv_name}`
     let orderby_stmt = `${tsr_name} DESC`
     return {'from': [tsvector, tsquery, tsrank], 'where': where_stmt, 'orderby': orderby_stmt}
@@ -128,7 +136,10 @@ function QuickFilterBoolean(  query_string_pholder, quoted_object_name, tsquery_
 function CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_name = "") {
     let vn = variable_name
     if (vn === default_tsq_name) {}
-    else if (vn !== "") {rp.CheckIdentifierError(vn)}
+    else if (vn !== "") {
+        rp.CheckIdentifierError(vn)
+        vn = sutil.ReturnQuotedColumnName(vn)
+    }
     let fn = ReturnTsQueryFunction(tsquery_function)
     let qp = query_string_pholder
     if (tsquery_function.includes('_simple')) {
@@ -144,7 +155,10 @@ function CreateTsVectorCommand (quoted_object_name,  variable_name = "", is_tsve
     //column_name or table_name
     let vn = variable_name
     if (vn === default_tsqv_name) {}
-    if (vn !== "") {rp.CheckIdentifierError(vn)}
+    if (vn !== "") {
+        rp.CheckIdentifierError(vn)
+        vn = sutil.ReturnQuotedColumnName(vn)
+    }
     if (!is_tsvector) {
         return `to_tsvector( ${quoted_object_name}::text ) ${vn}`.trim()   
     } else {
@@ -154,9 +168,18 @@ function CreateTsVectorCommand (quoted_object_name,  variable_name = "", is_tsve
 
 function CreateRank(query_cmd, document_cmd, rank_name) {
     let rn = rank_name
-    if (query_cmd !== default_tsq_name) { rp.CheckIdentifierError(query_cmd) }
-    if (document_cmd !== default_tsq_name) { rp.CheckIdentifierError(document_cmd) }
-    if (rn !== default_tsqr_name) { rp.CheckIdentifierError(rn) }
+    if (query_cmd !== default_tsq_name) { 
+        rp.CheckIdentifierError(query_cmd)
+        query_cmd = sutil.ReturnQuotedColumnName(query_cmd)        
+    }
+    if (document_cmd !== default_tsqv_name) { 
+        rp.CheckIdentifierError(document_cmd) 
+        document_cmd = sutil.ReturnQuotedColumnName(document_cmd)    
+    }
+    if (rn !== default_tsqr_name) { 
+        rp.CheckIdentifierError(rn)
+        rn = sutil.ReturnQuotedColumnName(rn)
+    }
     return `to_tsrank( ${query_cmd} , ${document_cmd} ) ${rn}`
 }
 
