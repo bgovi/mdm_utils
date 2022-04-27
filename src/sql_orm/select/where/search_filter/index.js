@@ -77,10 +77,6 @@ let tsquery_options = {'to_tsquery':'to_tsquery', 'plainto_tsquery':'plainto_tsq
     'phraseto_tsquery_simple':'phraseto_tsquery', 'websearch_to_tsquery_simple':'websearch_to_tsquery'
 }
 
-//The -- is ilegal using api. So should never conflict
-let default_tsq_name = '--tsq_query--'
-let default_tsqv_name = '--tsqv_vector--'
-let default_tsqr_name = '--tsqr_rank--'
 
 /*
 Commont parameters:
@@ -92,7 +88,13 @@ tsv_name:
 tsr_name:
 is_tsvector: (bool)
 
+need to quote identifier
 */
+
+let default_tsq_name = '"-tsq_query-"'
+let default_tsqv_name = '"-tsqv_vector-"'
+let default_tsqr_name = '"-tsqr_rank-"'
+
 
 function CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector=false) {
     /*
@@ -125,16 +127,13 @@ function QuickFilterBoolean(  query_string_pholder, quoted_object_name, tsquery_
 
 function CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_name = "") {
     let vn = variable_name
-    console.log(tsquery_function)
-    console.log(query_string_pholder)
-    console.log(variable_name)
-
-    if (vn !== "") {rp.CheckIdentifierError(vn)}
+    if (vn === default_tsq_name) {}
+    else if (vn !== "") {rp.CheckIdentifierError(vn)}
     let fn = ReturnTsQueryFunction(tsquery_function)
     let qp = query_string_pholder
     if (tsquery_function.includes('_simple')) {
         //doesnt remove stop words
-        return `${fn}('simple', ${qp} ) ${vn}`.trim()
+        return `${fn}( 'simple', ${qp} ) ${vn}`.trim()
     } else {
         //default functions removes stop words
         return `${fn}( ${qp} ) ${vn}`.trim()
@@ -144,25 +143,21 @@ function CreateTsQueryCommand (tsquery_function, query_string_pholder, variable_
 function CreateTsVectorCommand (quoted_object_name,  variable_name = "", is_tsvector=false) {
     //column_name or table_name
     let vn = variable_name
-
-    console.log(quoted_object_name)
-    console.log(variable_name)    
-    console.log(is_tsvector)
-
-
+    if (vn === default_tsqv_name) {}
     if (vn !== "") {rp.CheckIdentifierError(vn)}
-    if (is_tsvector) {
+    if (!is_tsvector) {
         return `to_tsvector( ${quoted_object_name}::text ) ${vn}`.trim()   
     } else {
         return `to_tsvector( ${quoted_object_name} ) ${vn}`.trim()
     }
-
 }
 
 function CreateRank(query_cmd, document_cmd, rank_name) {
-    let vn = variable_name
-    if (vn !== "") {rp.CheckIdentifierError(vn)}
-    return `ts_rank(${document_cmd}, ${query_cmd}) ${rank_name}`
+    let rn = rank_name
+    if (query_cmd !== default_tsq_name) { rp.CheckIdentifierError(query_cmd) }
+    if (document_cmd !== default_tsq_name) { rp.CheckIdentifierError(document_cmd) }
+    if (rn !== default_tsqr_name) { rp.CheckIdentifierError(rn) }
+    return `to_tsrank( ${query_cmd} , ${document_cmd} ) ${rn}`
 }
 
 function TsQueryStringProcess( query_string ) {
