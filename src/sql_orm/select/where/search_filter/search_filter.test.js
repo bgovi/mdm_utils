@@ -95,7 +95,7 @@ test('create full text search creation', () =>
     {
 
         let query_string_pholder = "$1"
-        let quoted_object_name = "table1"
+        let quoted_object_name = '"table1"'
         let tsquery_function = 'to_tsquery'
         let tsq_name = '__tsq_name__'
         let tsv_name = '__tsqv_name__'
@@ -105,7 +105,7 @@ test('create full text search creation', () =>
         let res = sx.CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector)
         let exp ={
             "from": [
-              'to_tsvector( table1::text ) __tsqv_name__',
+              'to_tsvector( "table1"::text ) __tsqv_name__',
               'to_tsquery( $1 ) __tsq_name__',
               'to_tsrank( __tsqv_name__ , __tsq_name__ ) __tsqr_name__'
             ],
