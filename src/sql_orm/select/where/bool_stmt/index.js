@@ -16,7 +16,7 @@ let valid_operators = {'=': '=', '!=': '!=',
     
     'lt': '<', 'le':'<=' , 'gt': '>',
     'ge': '>=', 'eq': '=', 'neq': '!=',
-    'in':'in',
+    'in':'IN',
     'not_in': "NOT IN", 
     'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
     'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
@@ -49,13 +49,13 @@ function CreateBooleanStatement(quoted_column_name, operator, placeholder ) {
     else if ( like_in.includes(ox) ) {
         // replacementObject[repName] = '%'+varx+'%'
         //if use placeholder with % wrap placeholder strings in concatenated %. i.e. '%'||$1||'%', '%'||$2||'%',  
-        return `(${cn} ${oval} ( ARRAY[ ${placeholder} ] ) )`
+        return `( ${cn} ${oval} ( ARRAY[ ${placeholder} ] ) )`
     } 
     else if ( ox === 'is_not_null' || ox === 'is_null' ) { 
-        return `(${cn} ${oval} )`
+        return `( ${cn} ${oval} )`
     }
     else if ( ox === 'in' || ox == 'not_in') { 
-        return `(${cn} ${oval} ( ${placeholder} ) )`
+        return `( ${cn} ${oval} ( ${placeholder} ) )`
     }
     else { return `( ${cn} ${oval} ${placeholder} )` }
 }

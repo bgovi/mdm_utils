@@ -22,3 +22,6 @@ route used to pull configurations for raw table
 pull columns: all fields are editable except 
 special columns
 */
+
+//parse optional parameters?
+//parse 

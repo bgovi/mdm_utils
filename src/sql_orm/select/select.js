@@ -39,3 +39,14 @@ var where_string = WhereClause(where_statements, columnObject, replacementObject
 var sort_string  = OrderClause( sort_statements, columnObject['columnMap'] )
 var pagination_string = PaginationClause(pagination_values)
 var outer_string = OuterQuery(where_statements, columnObject, replacementObject)
+
+function AssembleSearchStatement(post_body, url_params) {
+    // var user_id = req_body['user_id']
+    // var columnMap = columnObject['columnMap']
+    // var columnList = columnObject['columnList']
+    // var columnQuickSortString = columnObject['columnQuickSortString']
+}
+
+//CreateOrderByStatement
+//Create pagination
+//Create From Statements

@@ -23,3 +23,7 @@ function AssembleSearchStatement(post_body, url_params) {
     // var columnList = columnObject['columnList']
     // var columnQuickSortString = columnObject['columnQuickSortString']
 }
+
+//CreateOrderByStatement
+//Create pagination
+//Create From Statements

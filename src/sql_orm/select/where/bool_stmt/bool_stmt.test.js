@@ -1,19 +1,38 @@
-const ix = require('./insert.js')
+const bx = require('./index.js')
 
-// InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
-test('valid insert statement bind_type: $', () => 
+test('boolean lt statement test', () => 
     {
-        let ixs = ix.InsertStatement('schema_name', 'table_name', {'col1': 'a', 'Col2': 1}, [], 1, {} )
-        let query = `INSERT INTO "schema_name"."table_name" ("col1" , "Col2") VALUES ($1 , $2) RETURNING "id"`
-        let res_object = { "text": query, "values": ["a","1"], "new_index": 3 }
-        expect(ixs).toStrictEqual(res_object)
+
+        let x = bx.CreateBooleanStatement('"Col1"', "<", "$1" )
+        expect(x).toBe( '( "Col1" < $1 )' )
     }
 );
 
-test('invalid table name', () => 
+test('boolean like_in statement test', () => 
     {
-        let values = []
-        let delete_error = 'schema, table, functions, constraints and column_names may only A-Za-z0-9_ . Your string is test"--'
-        expect(() => { ds.DeleteStatement('schema1','test"--', {'id': 1}, values, 1, {'bind_type': '$'} )}).toThrow(delete_error)
-    }  
+
+        let x = bx.CreateBooleanStatement('"Col1"', "like_in", "$1,$2,$3" )
+        expect(x).toBe( '( "Col1" LIKE ANY ( ARRAY[ $1,$2,$3 ] ) )' )
+    }
+);
+
+test('boolean in statement test', () => 
+    {
+        let x = bx.CreateBooleanStatement('"Col1"', "in", "$1,$2,$3" )
+        expect(x).toBe( '( "Col1" IN ( $1,$2,$3 ) )' )
+    }
+);
+
+test('boolean is null', () => 
+    {
+        let x = bx.CreateBooleanStatement('"Col1"', "is_null", "" )
+        expect(x).toBe( '( "Col1" IS NULL )' )
+    }
+);
+
+test('boolean between', () => 
+    {
+        let x = bx.CreateBooleanStatement('"Col1"', "between", "$1,$2" )
+        expect(x).toBe( '( "Col1" BETWEEN SYMMETRIC $1 AND $2 )' )
+    }
 );

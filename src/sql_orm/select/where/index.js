@@ -60,12 +60,6 @@ data_type: string, float, int, etc. Determines what the value type should be in 
 
 // }
 
-// function WhereClause(where_statements) {
-//     //boolean array
-//     //where_string
-//     //return
-// }
-
 
 function AssembleWhereStatement(post_body, url_params) {
     // var user_id = req_body['user_id']
@@ -74,7 +68,7 @@ function AssembleWhereStatement(post_body, url_params) {
     // var columnQuickSortString = columnObject['columnQuickSortString']
 }
 
-function WhereClause( bool_statements, values, index, bind_type ) {
+function CreateBooleanArray( where_statements, values, index, bind_type ) {
     // {'column_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) }
     // add illegal character array value -1- -2-
     //let x = {}
@@ -82,9 +76,9 @@ function WhereClause( bool_statements, values, index, bind_type ) {
     let bx = []
 
     for (var i =0 ; i <x.length; i++) {
-        let cn = bool_statements.column_name
-        let cv = bool_statements.value
-        let op = bool_statements.operator
+        let cn = where_statements.column_name
+        let cv = where_statements.value
+        let op = where_statements.operator
 
         rp.CheckIdentifierError(cn)
         if (ox === 'is_not_null' || ox === 'is_null' ) {
@@ -100,10 +94,10 @@ function WhereClause( bool_statements, values, index, bind_type ) {
             bx.push(y)
         }
     }
-    let wstring = WhereClauseJoin( bx )
-    let z = { "text": wstring, "values": values, "new_index": index }
-    return z
+    return {'boolean_array': bx, 'new_index': index}
 }
+
+function CreateSearchFilterParams() {}
 
 function WhereClauseJoin( where_list ){
     //make aysnc for promise stuff??
@@ -113,21 +107,7 @@ function WhereClauseJoin( where_list ){
     } else { return '' }
 }
 
+module.exports = {
+    "CreateBooleanArray": CreateBooleanArray
 
-// function TsVectorAssembly(ts_vector_column, is_table=false ) {
-//     //plain text
-//     //order by __rank__ desc
-//     //append other order by
-
-// }
-
-// function AssembleFromStatements() {
-//     // to_tsvector(courses.title || courses.description) document,
-//     // to_tsquery('sales') query,
-//     // NULLIF(ts_rank(to_tsvector(courses.title), query), 0) rank_title,
-// }
-
-// function AssembleOrderByStatements() {
-
-//     //limit 500
-// }
+}
