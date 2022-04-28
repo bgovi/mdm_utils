@@ -8,6 +8,8 @@ data_type
 
 add types for expected params and default values from url.
 
+add hide column parameters?
+
 
 grid_id imports
 

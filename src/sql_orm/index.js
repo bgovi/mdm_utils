@@ -68,7 +68,7 @@ let query_params = [
         "search_rank": "", //bool
         "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
         "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
-    }]
+}]
 
 
 

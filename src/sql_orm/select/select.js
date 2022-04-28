@@ -16,12 +16,18 @@ value NOT BETWEEN low AND high;
 //where
 //order by
 //limit offset
+//get fields from returning?
+const rp = require('../../../../route_parser')
 
 function AssembleWhereStatement(post_body, url_params) {
     // var user_id = req_body['user_id']
     // var columnMap = columnObject['columnMap']
     // var columnList = columnObject['columnList']
     // var columnQuickSortString = columnObject['columnQuickSortString']
+
+
+    // "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
+    // used for select fields
 }
 
 
@@ -46,6 +52,8 @@ function AssembleSearchStatement(post_body, url_params) {
     // var columnList = columnObject['columnList']
     // var columnQuickSortString = columnObject['columnQuickSortString']
 }
+
+//claims?
 
 //CreateOrderByStatement
 //Create pagination

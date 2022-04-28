@@ -61,12 +61,12 @@ data_type: string, float, int, etc. Determines what the value type should be in 
 // }
 
 
-function AssembleWhereStatement(post_body, url_params) {
-    // var user_id = req_body['user_id']
-    // var columnMap = columnObject['columnMap']
-    // var columnList = columnObject['columnList']
-    // var columnQuickSortString = columnObject['columnQuickSortString']
-}
+// sx.CreateFullTextSearch(query_string_pholder, quoted_object_name, tsquery_function, tsq_name, tsv_name, tsr_name, is_tsvector)
+
+const rp = require('../../../route_parser')
+const bindp = require('../../bindp')
+const bstmt = require('./bool_stmt')
+const sfilt = require('./search_filter')
 
 function CreateBooleanArray( where_statements, values, index, bind_type ) {
     // {'column_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) }
@@ -75,39 +75,38 @@ function CreateBooleanArray( where_statements, values, index, bind_type ) {
     //use shift
     let bx = []
 
-    for (var i =0 ; i <x.length; i++) {
-        let cn = where_statements.column_name
-        let cv = where_statements.value
-        let op = where_statements.operator
+    for (var i =0 ; i < where_statements.length; i++) {
+        let cn = where_statements[i].column_name
+        let cv = where_statements[i].value
+        let op = where_statements[i].operator
 
         rp.CheckIdentifierError(cn)
-        if (ox === 'is_not_null' || ox === 'is_null' ) {
+        if (op === 'is_not_null' || op === 'is_null' ) {
             let quoted_column_name = `"${cn}"`
-            let y = CreateBooleanStatement(quoted_column_name, op, "")
+            let y = bstmt.CreateBooleanStatement(quoted_column_name, op, "")
             bx.push(y)
         } else {
             let bparams = bindp.AddBindParameters(cn, cv, {}, values, index, bind_type)
             index = bparams.new_index
             let quoted_column_name = `"${cn}"`
             let placeholder = bparams.pholder
-            let y = CreateBooleanStatement(quoted_column_name, op, placeholder)
+            let y = bstmt.CreateBooleanStatement(quoted_column_name, op, placeholder)
             bx.push(y)
         }
     }
     return {'boolean_array': bx, 'new_index': index}
 }
 
-function CreateSearchFilterParams() {}
-
 function WhereClauseJoin( where_list ){
     //make aysnc for promise stuff??
     if (where_list.length > 0) {
-        var where_string = 'WHERE ' + where_list.join(' AND ') +'\n'
+        var where_string = 'WHERE ' + where_list.join(' AND\n')
         return where_string
     } else { return '' }
 }
 
 module.exports = {
-    "CreateBooleanArray": CreateBooleanArray
-
+    "CreateBooleanArray": CreateBooleanArray,
+    "WhereClauseJoin": WhereClauseJoin,
+    "CreateFullTextSearch": sfilt.CreateFullTextSearch
 }
