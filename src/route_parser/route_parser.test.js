@@ -37,3 +37,10 @@ test('Is reserved column error', () =>
     }  
 );
 
+test('Is restricted schema', () => 
+    {
+        let schema_name = 'information_schema'
+        let schema_error = `${schema_name} is a restricted schema`
+        expect(() => { rp.CheckRestrictedSchema(schema_name) } ).toThrow(schema_error)
+    }  
+);

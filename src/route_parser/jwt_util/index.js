@@ -1,22 +1,20 @@
 /*
 This module handles all required options for using
 jsonwebtoken library
-
-
 */
 const jwt = require('jsonwebtoken')
 
 
 //maxAge: 1000, "2 days", "10h", "7d"
 //need to add options default instead of expiresIn
-function jwt_create(jwt_key, payload, expiresIn='7d') {
+function JwtCreate(jwt_key, payload, expiresIn='7d') {
     let token = jwt.sign(payload, jwt_key, {expiresIn: expiresIn})
     return token
 }
 
 
-function jwt_is_valid(jwt_token, jwt_key) {
-
+function JwtIsValid(jwt_token, jwt_key) {
+    //check for valid token
     try {
         let jwt_decoded = jwt.verify(jwt_token, jwt_key)
         let is_valid = true
@@ -31,13 +29,14 @@ function jwt_is_valid(jwt_token, jwt_key) {
 
 }
 
-function jwt_decoded(jwt_token) {
+function JwtDecoded(jwt_token) {
+    //parses token
     let decoded = jwt.decode(jwt_token)    
     return decoded.payload
 }
 
 
-function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {
+function JwtRefresh(jwt_token, jwt_key, expiresIn='7d') {
     // const payload = jwt.verify(token, this.secretOrPublicKey, refreshOptions.verify);
     // delete payload.iat;
     // delete payload.exp;
@@ -49,8 +48,8 @@ function jwt_refresh(jwt_token, jwt_key, expiresIn='7d') {
 }
 
 module.exports = {
-    'jwt_is_valid': jwt_is_valid,
-    'jwt_decoded': jwt_decoded,
-    'jwt_create': jwt_create,
-    'jwt_refresh': jwt_refresh
+    'JwtIsValid': JwtIsValid,
+    'JwtDecoded': JwtDecoded,
+    'JwtCreate':  JwtCreate,
+    'JwtRefresh': JwtRefresh
 }

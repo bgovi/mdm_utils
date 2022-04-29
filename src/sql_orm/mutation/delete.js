@@ -1,43 +1,42 @@
 /*
-Responsible for creating insert, batch_insert, upsert and batch upsert
+Responsible for creating delete statement with replacement operations. 
+Each row is required to have an id column.
 
-pass default values. ignore _updated_at_, _created_at_, _last_modified_by_, id
-
-INSERT INTO schema.table_name (columns) VALUES ( ) RETURNING *;
-
-BatchInsert
-
-Upsert
-
-Batch Insert
-
-set default set null
-
-payload (null as default)
+DeleteStatement: Actual delete statement
+DeleteAtStatement: Uses update to set a _deleted-at timestamp. Represents paranoid mode.
 */
 const rp = require('../../route_parser')
 const rs = require('./return_str.js')
+const sutil = require('../../sutils')
+const bindp = require('../bindp')
 
 
-function delete_statement(schema_name, table_name, row_id, return_param = 'id', return_options = null) {
+function DeleteStatement(schema_name, table_name, row_data, values, index, delete_params){ 
     rp.CheckIdentifierError(schema_name)
     rp.CheckIdentifierError(table_name)
+    sutil.MissingId(row_data, 'delete')
+    let params = sutil.DefaultParams(delete_params)
 
-    let returning_string = rs.ReturningStr(return_param, return_options)
-    let out_text = `DELETE FROM "${schema_name}"."${table_name}" WHERE id =$1 ${returning_string}`.trim()
-    return { "text": out_text, "values": [row_id] }
+    let returning_string = rs.ReturningStr(params.return_param, params.return_options)
+
+    let bparams = bindp.AddBindParameters('id', row_data['id'], {}, values, index, params.bind_type, array_type = params.array_type)
+    let out_text = `DELETE FROM "${schema_name}"."${table_name}" WHERE id =${bparams.pholder} ${returning_string}`.trim()
+    return { "text": out_text, "values": values, 'new_index': bparams.new_index }
 
 }
 
-function delete_at_statement(schema_name, table_name, row_id, return_param = 'id', return_options = null) {
+function DeleteAtStatement(schema_name, table_name, row_data, values, index, delete_params){ 
     rp.CheckIdentifierError(schema_name)
     rp.CheckIdentifierError(table_name)
-    let returning_string = rs.ReturningStr(return_param, return_options)
-    let out_text = `UPDATE "${schema_name}"."${table_name}" set _deleted_at = current_timestamp WHERE id =$1 ${returning_string}`.trim()
-    return { "text": out_text, "values": [row_id] }
+    sutil.MissingId(row_data, 'delete')
+    let params = sutil.DefaultParams(delete_params)
+    let returning_string = rs.ReturningStr(params.return_param, params.return_options)
+    let bparams = bindp.AddBindParameters('id', row_data['id'], {}, values, index, params.bind_type, array_type = params.array_type)
+    let out_text = `UPDATE "${schema_name}"."${table_name}" set _deleted_at = current_timestamp WHERE id =${bparams.pholder} ${returning_string}`.trim()
+    return { "text": out_text, "values": values, 'new_index': bparams.new_index   }
 }
 
 module.exports = {
-    'delete_statement': delete_statement,
-    'delete_at_statement': delete_at_statement
+    'DeleteStatement': DeleteStatement,
+    'DeleteAtStatement': DeleteAtStatement
 }

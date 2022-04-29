@@ -1,10 +1,10 @@
 /*
 Test identifier_check recognizes special characters
 */
-const ic = require('./identifier_check')
+const ic = require('./index.js')
 
 test('Valid string', () => {
-    expect(ic.valid_identifier('user_Prov9')).toBe(true);
+    expect(ic.ValidIdentifier('user_Prov9')).toBe(true);
 });
 
 // test.each
@@ -17,15 +17,20 @@ invalid_characters = ["'", '"', "`", "~",  "!", "@",
 
 test.each(invalid_characters)(
   'Invalid Character %s',
-  (ident_str) => { expect( ic.valid_identifier(ident_str) ).toBe(false) }
+  (ident_str) => { expect( ic.ValidIdentifier(ident_str) ).toBe(false) }
 );
 
 
 test('Valid string no error thrown', () => {
-  expect(() => ic.check_identifier_error('random_name')).not.toThrow();
+  expect(() => ic.CheckIdentifierError('random_name')).not.toThrow();
 });
+
+test('empty string throw error', () => {
+  expect(() => ic.CheckIdentifierError('')).toThrow();
+});
+
 
 test.each(invalid_characters)(
   'Throw Error Invalid Character %s',
-  (ident_str) => { expect(() => ic.check_identifier_error(ident_str)).toThrow() }
+  (ident_str) => { expect(() => ic.CheckIdentifierError(ident_str)).toThrow() }
 );

@@ -41,10 +41,34 @@ encodeURIComponent
 decodeURIComponent
 */
 const idk   = require('../indentifier_check')
-const RJSON = require('relaxed-json') 
+const RJSON = require('relaxed-json')
+const sutil = require('../../sutils')
 
 var restricted_keys = [".sort.",".where.", ".param.",".dval." ,".id.",".limit.",".offset."]
-var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike']
+var operators = ['in', 'not_in', 'lt','le', 'gt','ge', 'between', 'not_between', 'eq', 'neq', 'like','ilike',
+
+'similar', 'not_similar', 'is_not_null', 'is_null',
+'like_in', 'not_like_in',
+'ilike_in', 'not_ilike_in'
+
+]
+
+
+// let valid_operators = {'=': '=', '!=': '!=', 
+//     '<>': '<>', '>':'>', '>=': '>=', 
+//     '<': '<', '<=': '<=', 
+//     'lt': '<', 'le':'<=' , 'gt': '>',
+//     'ge': '>=', 'eq': '=', 'neq': '!=',
+//     'in':'in',
+//     'not_in': "NOT IN", 
+//     'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
+//     'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
+//     'not_ilike': "NOT ILIKE",
+//     'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
+//     'is_not_null': "IS NOT NULL",
+//     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
+//     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
+// }
 
 
 //for client side need wrapper to parse into req_query form
@@ -78,7 +102,7 @@ function ParseUrlQuery(req_query, max_limit=100000) {
         }
         else {
             //if key not valid skip
-            if (! idk.valid_identifier(qkey)) { continue }
+            if (! idk.ValidIdentifier(qkey)) { continue }
             let qval2 = ParseQval(qval) //returns object
             if (Object.keys(qval2) === 0 ) {continue}
             AssembleWhereQueryObject(where_object, qkey, qval2)
@@ -120,7 +144,7 @@ function ParseQval(query_value) {
        try {
         let json_string = RJSON.transform(query_value)
         let jx = JSON.parse(json_string)
-        if (IsObject(jx)) {
+        if (sutil.IsObject(jx)) {
             json_object = jx
         } else {
             json_object = {'eq': String( query_value ) }
@@ -132,7 +156,7 @@ function ParseQval(query_value) {
         json_object = {'eq': String( query_value ) }
     } 
     else {
-        if (IsObject(query_value)) { json_object = query_value }
+        if (sutil.IsObject(query_value)) { json_object = query_value }
         else { json_object = {'eq': String( query_value ) } }
     }
 
@@ -142,25 +166,13 @@ function ParseQval(query_value) {
     for(var i =0; i<query_keys.length; i++) {
         if (! operators.includes(query_keys[i]) ) {continue}
 
-        if (Array.isArray(json_object[query_keys[i]])) {
+        if (sutil.IsArray(json_object[query_keys[i]])) {
             json_object_out[query_keys[i]] = StringifyArray( json_object[query_keys[i]] )
         } else {
             json_object_out[query_keys[i]] = String( json_object[query_keys[i]] )
         }
     }
     return json_object_out
-
-}
-
-function IsObject(json_object) {
-    //check if object
-    if (
-        typeof json_object === 'object' &&
-        !Array.isArray(json_object) &&
-        json_object !== null
-    ) {return true} else {
-        return false
-    }
 
 }
 
@@ -183,10 +195,10 @@ function ParseColumnOrder(c_param, config_object){
     try {
         let json_string = RJSON.transform(c_param)
         let jx = JSON.parse(json_string)
-        if (! Array.isArray(jx)) {return}
+        if (! sutil.IsArray(jx)) {return}
         for(var i =0 ; i<jx.length; i++) {
             let cname = String(jx[i])
-            if (! idk.valid_identifier(cname)) { continue }
+            if (! idk.ValidIdentifier(cname)) { continue }
             config_object["corder"] = cname
         }
     } catch (e) {
@@ -210,7 +222,7 @@ function ParseWhereUrl(where_parameters, where_object){
             for (var j = 0; j < query_keys.length; j++) {
                 let qkey  = query_keys[j]
                 let qval  = jx[i][qkey]
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 //check key is valid
                 let qval2 = ParseQval(qval) //returns object
                 if (Object.keys(qval2) === 0 ) {continue}
@@ -238,7 +250,7 @@ function ParseSortUrl(sort_params, sort_object){
                 let qkey  = query_keys[j]
                 let qval  = String(jx[i][qkey])
                 //if key not valid skip
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 if (qval === 'asc' || qval === 'a') {
                     let y = {}
                     y[qkey] = 'asc'
@@ -270,7 +282,7 @@ function ParseParamDvalUrl(url_key,p_params, config_object){
                 let qkey  = query_keys[j]
                 let qval  = jx[i][qkey]
                 //if key not valid skip
-                if (! idk.valid_identifier(qkey)) { continue }
+                if (! idk.ValidIdentifier(qkey)) { continue }
                 x[qkey] = qval
             }
 
@@ -303,7 +315,7 @@ function ParsePageUrl(url_key, qval, page_object, max_limit = 100000){
 
 function AssembleWhereQueryObject(where_object, col_name, json_object) {
     /*
-    {'variable_name': , 'operator': , value: } how to handle arrays?
+    {'column_name': , 'operator': , value: } how to handle arrays?
     //force everything to a string?
 
     */
@@ -314,43 +326,43 @@ function AssembleWhereQueryObject(where_object, col_name, json_object) {
 
     if (key === 'in') {
         if (IsValidArray(value), len_min =1 ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'in', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'in', 'value':  StringifyArray(value) })
         }
 
     } else if ('not_in' === key) {
         if (IsValidArray(value), len_min =1 ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) })
         }
     } else if ('gt' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'gt', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'gt', 'value':  String(value) })
     } else if ('ge' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'ge', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'ge', 'value':  String(value) })
     } else if ('lt' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'lt', 'value':  String(value) })        
+        where_object.push( {'column_name': col_name, 'operator': 'lt', 'value':  String(value) })        
     } else if ('le' === key) {
-        where_object.push( {'variable_name': col_name, 'operator': 'le', 'value':  String(value) })        
+        where_object.push( {'column_name': col_name, 'operator': 'le', 'value':  String(value) })        
     } else if ('between' === key ) {
         if (IsValidArray(value, len_min =2, len_max=2 ) ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'between', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'between', 'value':  StringifyArray(value) })
         }
     } else if ('not_between' === key ) {
         if (IsValidArray(value, len_min =2, len_max=2 ) ) {
-            where_object.push( {'variable_name': col_name, 'operator': 'not_between', 'value':  StringifyArray(value) })
+            where_object.push( {'column_name': col_name, 'operator': 'not_between', 'value':  StringifyArray(value) })
         }
     } else if ('eq' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'eq', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'eq', 'value':  String(value) })
     } else if ('neq' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'neq', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'neq', 'value':  String(value) })
     } else if ('like' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'like', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'like', 'value':  String(value) })
     } else if ('ilike' === key ) {
-        where_object.push( {'variable_name': col_name, 'operator': 'ilike', 'value':  String(value) })
+        where_object.push( {'column_name': col_name, 'operator': 'ilike', 'value':  String(value) })
     }
 }
 
 function IsValidArray(array_object, len_min = -1, len_max=-1) {
     //checks if object is an array and has the correct size
-    if (! Array.isArray(array_object) ) {return false}
+    if (! sutil.IsArray(array_object) ) {return false}
     else if ( len_min > -1 && len_max > -1 ) {
         if (array_object.length <= len_max && array_object.length >= len_min) {return true}
         else{return false}

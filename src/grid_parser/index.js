@@ -8,6 +8,8 @@ data_type
 
 add types for expected params and default values from url.
 
+add hide column parameters?
+
 
 grid_id imports
 
@@ -22,3 +24,6 @@ route used to pull configurations for raw table
 pull columns: all fields are editable except 
 special columns
 */
+
+//parse optional parameters?
+//parse 

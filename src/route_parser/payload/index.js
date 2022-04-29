@@ -4,7 +4,6 @@ This module defines the payload structure for crud operations
 row_data : {'column_name1': 'column_value1', 'column_name2': 'column_value2'}
 
 Also provides functions to process
-RETURNING statement
 */
 const idx = require('../indentifier_check')
 
@@ -32,10 +31,11 @@ let default_values = [
     'current_date', 'localtime', 'localtimestamp', ""
 ]
 
-// function
-function return_valid_default_value(psql_reserved_constant) {
+
+function ReturnValidDefaultValue(psql_reserved_constant) {
     /*
-    if name in list return value otherwise return default
+    if name in default_values list return value otherwise return default
+    This function sanitizes values as they are direclty entered into sql string
 
     if empty string return "''"
     */
@@ -47,8 +47,9 @@ function return_valid_default_value(psql_reserved_constant) {
     return 'default'
 }
 
-function default_object(default_row_data) {
+function DefaultObject(default_row_data) {
     /*
+    return object with sanitized default values
     default_row_data : {'column_name1': 'default_value1', 'column_name2': 'default_value2'}
 
     Checks if default_value is acceptable. If not returns default. for the column_name
@@ -57,9 +58,9 @@ function default_object(default_row_data) {
     let row_keys = Object.keys(default_row_data)
     for (var i = 0; i < row_keys.length; i++) {
         let rowKey = row_keys[i]
-        if ( ! idx.valid_identifier(rowKey)) { continue }
+        if ( ! idx.ValidIdentifier(rowKey)) { continue }
         let dval   = default_row_data[ rowKey ]
-        let defval = return_valid_default_value(dval)
+        let defval = ReturnValidDefaultValue(dval)
         def_object[rowKey] = defval 
     }
     return def_object
@@ -83,17 +84,22 @@ let query_params = [
     "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
     "default_fields": "", //object with default type {x:"default_value_x", y:"default_value_y"}
     "set_fields": "",  //array that has columns that should be used for set
-    "on_conflict": "",
-    "on_constraint": "",
-    "where": "",
-    "page": "", //object {'offset': val, 'limit': val}
+    "on_conflict": "", //string a-zA-Z0-9
+    "on_constraint": "", //string a-zA-Z0-9
+    "where": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
+    "offset": "", //should be integer greater or equal to 0
+    "limit": "", //should be positive integer
     "search_filter": "", //string or object with quick filter type:
     "search_rank": "", //bool
     "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
     "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
-}]
+    }
+]
 
-function is_reserved_column(column_name) {
+
+
+
+function IsReservedColumn(column_name) {
     /*
     This funciton checks if input column is reserved. Used to filter out payload
     in crud operations (insert, update, delete) 
@@ -104,8 +110,8 @@ function is_reserved_column(column_name) {
     return false
 }
 
-function is_reserved_column_error(column_name) {
-    if (is_reserved_column(column_name)) {
+function IsReservedColumnError(column_name) {
+    if (IsReservedColumn(column_name)) {
         throw new Error(`${column_name} is reserved key word. reserved names are ${reserved_columns}`)
     }
 }
@@ -136,7 +142,7 @@ This module contains all the wrapper functions than handle the returned output f
 
     may add row preservation:
 */
-function return_output(schema_name, table_name,crud_type,output, is_error=false, err_msg="") {
+function ReturnOutput(schema_name, table_name,crud_type,output, is_error=false, err_msg="") {
     output = {
         'schema_name': schema_name,
         'table_name': table_name,
@@ -148,10 +154,14 @@ function return_output(schema_name, table_name,crud_type,output, is_error=false,
     return output
 }
 
+
+
+
+
 module.exports = {
-    'is_reserved_column': is_reserved_column,
-    'is_reserved_column_error': is_reserved_column_error,
-    'return_valid_default_value': return_valid_default_value,
-    'return_output': return_output,
-    'default_object': default_object
+    'IsReservedColumn': IsReservedColumn,
+    'IsReservedColumnError': IsReservedColumnError,
+    'ReturnValidDefaultValue': ReturnValidDefaultValue,
+    'ReturnOutput': ReturnOutput,
+    'DefaultObject': DefaultObject
 }

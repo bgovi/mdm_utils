@@ -1,7 +1,3 @@
-/*
-
-
-*/
 const up = require('./index.js')
 
 test('Parse Url Query string', () => {
@@ -9,11 +5,11 @@ test('Parse Url Query string', () => {
     let x = up.ParseUrlQuery(url_string)['where']
 
     expect(x).toEqual([
-        {'variable_name':'y',"value":'5', "operator":"lt"},
-        {'variable_name':'x',"value":"'abc'", "operator":"eq"},
-        {'variable_name':'z',"value":"def", "operator":"neq"},
-        {'variable_name':'xin',"value":["1","2","3"], "operator":"in"},
-        {'variable_name':'xb',"value":["1","2"], "operator":"between"},
+        {'column_name':'y',"value":'5', "operator":"lt"},
+        {'column_name':'x',"value":"'abc'", "operator":"eq"},
+        {'column_name':'z',"value":"def", "operator":"neq"},
+        {'column_name':'xin',"value":["1","2","3"], "operator":"in"},
+        {'column_name':'xb',"value":["1","2"], "operator":"between"},
     
     
     ]) 
@@ -24,9 +20,9 @@ test('Parse .where. Query Configurations', () => {
     let x = up.ParseUrlQuery(url_string)['where']
 
     expect(x).toEqual([
-        {'variable_name':'x',"value":'5', "operator":"eq"},
-        {'variable_name':'y',"value":'7', "operator":"eq"},
-        {'variable_name':'z',"value":['a','b','c'], "operator":"in"}    
+        {'column_name':'x',"value":'5', "operator":"eq"},
+        {'column_name':'y',"value":'7', "operator":"eq"},
+        {'column_name':'z',"value":['a','b','c'], "operator":"in"}    
     
     ]) 
 });
