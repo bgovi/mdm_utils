@@ -53,10 +53,14 @@ app.use('/', AuthCheck['authCheck'])
 // LoadDatabaseRoutes
 LoadRoutes(app)
 StaticRoutes(express, app , cors)
-
-
-
-
-
-
 SetHttps['startHttpsServer'](app)
+
+/*
+jwt_check
+route_parser
+route_guard
+run_query
+
+
+
+*/

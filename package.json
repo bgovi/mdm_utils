@@ -2,11 +2,7 @@
   "name": "pe_mdm_utils",
   "version": "1.0.2",
   "description": "Used to maintain utility functions for mdm system",
-  "main": "./src/main-module.mjs",
-  "exports": {
-    "import": "./src/main-module.mjs",
-    "require": "./src/main-module.cjs"
-  },
+  "main": "index.js",
   "scripts": {
     "test": "jest"
   },
