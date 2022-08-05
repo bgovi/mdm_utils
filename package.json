@@ -22,11 +22,27 @@
   },
   "homepage": "https://github.com/bgovi/mdm_utils#readme",
   "dependencies": {
+    "app-root-path": "^3.0.0",
+    "body-parser": "^1.20.0",
+    "cluster": "^0.7.7",
+    "cookie-parser": "^1.4.6",
+    "cookies": "^0.8.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
+    "jwt-simple": "^0.5.6",
+    "passport": "^0.6.0",
+    "passport-azure-ad": "^4.3.4",
+    "passport-azure-oauth2": "^0.1.0",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
     "relaxed-json": "^1.0.3",
+    "sequelize": "^6.21.3",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
-    "jest": "^27.4.7"
+    "jest": "^27.4.7",
+    "nodemon": "^2.0.19"
   }
 }
