@@ -25,7 +25,7 @@ function SelectStatement(schema_name, table_name, req_body, values, index, selec
     ${where_stm}
     ${order_by_stm}
     ${page_stm}
-    `.trim()
+    `.trim() + ';'
     return { "text": select_str, "values": values, "new_index": new_index } 
 }
 

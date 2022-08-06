@@ -40,7 +40,7 @@ function CreateTransaction(query, session_params) {
     let session_stm = SessionParams(session_params)
     let transaction = `BEGIN;
     ${session_stm}'
-    ${query};
+    ${query}
     COMMIT;
     `
     return transaction

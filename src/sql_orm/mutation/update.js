@@ -25,7 +25,7 @@ function UpdateStatement(schema_name, table_name, row_data, values, index, updat
 
     let update_str_params = CreateSetStatement(row_data, params, values, index)
     let returning_string = rs.ReturningStr(params.return_param, params.return_options)
-    let query = `UPDATE "${schema_name}"."${table_name}" SET ${update_str_params.set_str} WHERE ${update_str_params.where_str} ${returning_string}`.trim()
+    let query = `UPDATE "${schema_name}"."${table_name}" SET ${update_str_params.set_str} WHERE ${update_str_params.where_str} ${returning_string}`.trim() +';'
     let xs = { "text": query, "values": values, 'new_index': update_str_params.new_index }
     return xs
 }

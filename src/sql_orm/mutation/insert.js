@@ -29,7 +29,8 @@ function BatchInsertStatement(schema_name, table_name, row_data_array,values, in
         index = ix.new_index
         query_output.push(ix.text)
     }
-    return { "text": query_output, "values": values, "new_index": index } 
+    let query = query_output.join('\n')
+    return { "text": query, "values": values, "new_index": index } 
 }
 
 function InsertStatement(schema_name, table_name, row_data,values, index, insert_params ){
@@ -45,7 +46,7 @@ function InsertStatement(schema_name, table_name, row_data,values, index, insert
     let constraint_string    = OnConstraint(params)
     let returning_string     = rs.ReturningStr(params.return_param, params.return_options)
     let query1 = `INSERT INTO "${schema_name}"."${table_name}" ${insert_cv_string.text} ${constraint_string}`.trim()
-    let query  = `${query1} ${returning_string}`.trim()
+    let query  = `${query1} ${returning_string}`.trim()  +';'
     return { "text": query, "values": values, "new_index": insert_cv_string.new_index } 
 }
 
