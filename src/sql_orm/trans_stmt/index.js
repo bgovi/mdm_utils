@@ -1,36 +1,11 @@
 /*
-This module handles all of the primary crud operations.
-Returns array of crud operations for sequelize or node postgres
-
-CRUD Operations API. Below are common input parameters used for the crud opeartions: Insert, Update, Upsert, Delete. Save is
-a wrapper function for these fields
-
-Crud Return Types:
-//insert
-create: {row_data}
-upsert: [{row_data}, null]
-delete: integer
-update: [integer]
-select
-search
-help
-*/
-
-//return object
-
-/*
-
-Used to assemble transaction string.
-
-combines information from mutations and select statement
+Takes session_params object allong with query string to return sql transaction
+with postgres claims
 
 
 BEGIN;
 set local app.user_id = 'id from user'
-
-query statement
-
-
+query statement;
 COMMIT;
 
 */
