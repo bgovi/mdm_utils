@@ -68,6 +68,14 @@ const bindp = require('../../bindp')
 const bstmt = require('./bool_stmt')
 const sfilt = require('./search_filter')
 
+function WhereStatement( where_statements, values, index, select_params ) {
+    let bind_type  = select_params['bind_type']
+    let where_data = CreateBooleanArray(where_statements, values, index, bind_type)
+    let where_str  = WhereClauseJoin(where_data['boolean_array'])
+    return {'where_str': where_str, 'new_index': where_data['new_index']}
+}
+
+
 function CreateBooleanArray( where_statements, values, index, bind_type ) {
     // {'column_name': col_name, 'operator': 'not_in', 'value':  StringifyArray(value) }
     // add illegal character array value -1- -2-
@@ -108,5 +116,6 @@ function WhereClauseJoin( where_list ){
 module.exports = {
     "CreateBooleanArray": CreateBooleanArray,
     "WhereClauseJoin": WhereClauseJoin,
-    "CreateFullTextSearch": sfilt.CreateFullTextSearch
+    "CreateFullTextSearch": sfilt.CreateFullTextSearch,
+    "WhereStatement": WhereStatement
 }
