@@ -5,7 +5,7 @@ Array of objects. Contains information for crud operations.
 Operation order is not preserved.
 
 let query_params = 
-    {
+{
     "crud_type": "", //only needed for save route 
     "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
     "default_fields": "", //object with default type {x:"default_value_x", y:"default_value_y"}
@@ -13,17 +13,16 @@ let query_params =
     "on_conflict": "", //string a-zA-Z0-9
     "on_constraint": "", //string a-zA-Z0-9
     "do_nothing": false, //nothing or update
-    "where": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
+    "where": "", //array of objects:  [{column_name:"valx1", operator:"=", value="value" },
+        {column_name:"valx2", operator:"in", value= ["value1", "value2"]}]
     "offset": "", //should be integer greater or equal to 0
     "limit": "", //should be positive integer
     "search_filter": "", //string or object with quick filter type:
     "search_rank": "", //bool
     "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
-    "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
-
-    }
+    "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}]
+}
 */
-
 const type_check = require('../../sutils')
 const idx = require('../indentifier_check')
 
@@ -161,12 +160,24 @@ class InputPayload {
     OnConflictAndContraint() {
         /*
         set constraint fields
+        "on_conflict": "", //string a-zA-Z0-9
+        "on_constraint": "", //string a-zA-Z0-9
+        "do_nothing": false, //nothing or update
         */
+        if (this.qp.hasOwnProperty('on_conflict')) {
+            let x = this.qp['on_conflict']
+            if (! type_check.IsString(x)) { this.qp['on_conflict'] = "" }
+        } else { this.qp['on_conflict'] = "" }
+        if (this.qp.hasOwnProperty('on_constraint')) {
+            let x = this.qp['on_constraint']
+            if (! type_check.IsString(x)) { this.qp['on_constraint'] = "" }
+        } else { this.qp['on_constraint'] = "" }
 
-        //"do_nothing"
+        if (this.qp.hasOwnProperty('do_nothing')) {
+            let x = this.qp['do_nothing']
+            if (! type_check.IsBoolean(x)) { this.qp['do_nothing'] = false }
+        } else { this.qp['do_nothing'] = false }
     }
-
-
     ReturnValidDefaultValue(psql_reserved_constant) {
         /*
         if name in default_values list return value otherwise return default
@@ -181,9 +192,7 @@ class InputPayload {
         }
         return 'default'
     }
-
     InvalidQueryParamError(crud_type) { throw new Error (`Invalid crud_type for query_params: ${crud_type}`) }
-
 }
 
 module.exports = InputPayload
