@@ -20,6 +20,16 @@ function RoutePermissionsQuery(schema_name, table_name, crud_type, user_session,
     const default_table_permission = await data_tables.findOne({where: {'id': table_id}  })
 }
  
+function CrudNotAllowed(crud_name, table_name, route_name, row_node_id, row_id) {
+    //used to return json object when crud operation is not permissiable. used when allow_* is false
+    var err_msg = `${crud_name} not allowed for ${table_name} table. in route ${route_name} for client row ${row_node_id}`
+    if (crud_name == 'updated' || crud_name == 'delete') {
+        err_msg += '. Row can be deactivated  by setting is_active to false to prevent further use and to hide.'
+    }
+    //if update or delete
+    return srf.ModifyFail (row_node_id,  row_id, err_msg)
+}
+
 
 module.exports = {
     "AddPermissiosn": AddPermissions,

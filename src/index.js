@@ -16,11 +16,11 @@ NODE_ENV=production sudo node server.js
 */
 const express = require('express')
 const bodyParser = require("body-parser")
-const compression = require('compression')
-
+// const compression = require('compression')
+const port = 3000
 
 // const cors = require('cors')
-// const app = express()       //create express object
+const app = express()       //create express object
 // app.use(compression() )     //compresses and decompress data being sent back and forth
 // app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for downstream processing
 
@@ -41,7 +41,49 @@ jwt_check
 route_parser
 route_guard
 run_query
-
-
-
 */
+
+//app.use ? for grid js site
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+//app.use ? for grid
+app.get('/data/:schema_name/:table_name/', (req, res) => {
+    /*
+    Select string
+    */
+    let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
+    res.send(x)
+})
+
+app.post('/data/:schema_name/:table_name/:crud_type', (req, res) => {
+    try{
+        let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
+        //req.body
+        res.send(x)
+    } catch (e) {
+        res.send(e)
+    }
+})
+
+//for json configurations.
+app.get('/grid/:project_name/:table_name/', (req, res) => {
+    /*
+    Select string
+    */
+    try{
+        req.params.crud_type = "SELECT ALL ROWS"
+        let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
+        res.send(x)
+    } catch (e) {
+
+    }
+
+})
+
+
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
