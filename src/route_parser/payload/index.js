@@ -6,6 +6,8 @@ row_data : {'column_name1': 'column_value1', 'column_name2': 'column_value2'}
 Also provides functions to process
 */
 const idx = require('../indentifier_check')
+const InputPayload = require('./input_payload')
+const OutputPayload = require('./output_payload')
 
 var reserved_columns = [
     /*
@@ -83,18 +85,17 @@ function IsReservedColumnError(column_name) {
     }
 }
 
-
-
-
-
-
-
-
+function InputPayloadParser(query_params) {
+    let x = new InputPayload()
+    let y = x.RunInit(query_params)
+    return y
+}
 
 module.exports = {
     'IsReservedColumn': IsReservedColumn,
     'IsReservedColumnError': IsReservedColumnError,
     'ReturnValidDefaultValue': ReturnValidDefaultValue,
-    'ReturnOutput': ReturnOutput,
+    'OutputPayload': OutputPayload,
+    'InputPayloadParser': InputPayloadParser,
     'DefaultObject': DefaultObject
 }

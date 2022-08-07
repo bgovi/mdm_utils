@@ -33,3 +33,5 @@ function ReturnOutput(schema_name, table_name,crud_type,output_data, error_data,
     }
     return output
 }
+
+module.exports = ReturnOutput
