@@ -1,39 +1,36 @@
 const db = require('./index.js')
-const { QueryTypes } = require('sequelize');
 
 
 // InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
-test('simple select', async () => 
+test('simple insert', async () => 
     {
-        // console.log(db.query)
-        // let query = db.query
-        // console.log(query)
-        try {
-            const [res, meta] = await db.sequelize.query(`SELECT null::timestamp;`)
-            // res[0]['created_at'] = String(res[0]['created_at'])
-            console.log(res)
-            // console.log(meta)
 
+        try {
+            let res = await db.RunQuery(`INSERT INTO x VALUES (:x) RETURNING x;`, {x:2} )
+            console.log(res)
         } catch (e) {
-            console.log(e)
+            let pmsg  = e.parent
+            let omsg  = e.original
+            console.log(String(pmsg))
         }
-        // const [res, meta] = await db.query('select * FROM company limit 2')
-        // console.log(res)
-        // console.log(meta)
+        expect(true).toBe(true)
+    }
+);
+
+test('simple select append to out_data', async () => 
+    {
+        let out_data   = []
+        let error_data = []
+        await db.RunQueryAppendData (out_data, error_data, `SELECT * from x limit 5;`, {})
+        console.log(out_data)
         expect(true).toBe(true)
     }
 );
 
 
 
-
-
 test('close sequelize', () => 
     {
-        // console.log(db.query)
-        // let query = db.query
-        // console.log(query)
-
         db.sequelize.close()
         expect(true).toBe(true)
     }
