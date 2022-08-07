@@ -12,6 +12,7 @@ let query_params =
     "set_fields": "",  //array that has columns that should be used for set in upsert
     "on_conflict": "", //string a-zA-Z0-9
     "on_constraint": "", //string a-zA-Z0-9
+    "do_nothing": false, //nothing or update
     "where": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
     "offset": "", //should be integer greater or equal to 0
     "limit": "", //should be positive integer
@@ -19,10 +20,11 @@ let query_params =
     "search_rank": "", //bool
     "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
     "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
+
     }
 */
 
-const sutil = require('../../sutils')
+const type_check = require('../../sutils')
 const idx = require('../indentifier_check')
 
 class InputPayload {
@@ -32,19 +34,33 @@ class InputPayload {
             'current_date', 'localtime', 'localtimestamp', ""
         ]
         this.offset = 0
-        this.limit  = 100000 
+        this.limit  = 100000
+        this.qp = null
     }
     RunInit(query_params) {
-        //should be object add typecheck
-
+        if (  !type_check.IsObject(query_params) ) {this.qp = {}}
+        else{ this.qp = query_params }
+        this.CrudType()
+        this.DefaultFields()
+        this.Data()
+        this.Where()
+        this.Limit()
+        this.Offset()
+        this.SearchFilter()
+        this.SearchRank()
+        this.SetFields()
+        this.Returning()
+        this.OnConflictAndContraint()
     }
-    CrudTypeValid(query_params) {
-        let key = 'crud_type'
-        if (!HasKey(query_params, key)) {return}
-        if (valid_crud_types.includes(query_params[key])) {return }
-        InvalidQueryParamError(key)
+    CrudType() {
+        let qp = this.qp
+        if (!qp.hasOwnProperty('crud_type')) {
+            qp['crud_type'] = 'select'
+            return
+        }
+        InvalidQueryParamError(qp['crud_type'])
     }
-    DefaultFields(default_row_data) {
+    DefaultFields() {
         /*
         return object with sanitized default values
         default_row_data : {'column_name1': 'default_value1', 'column_name2': 'default_value2'}
@@ -52,7 +68,8 @@ class InputPayload {
         Checks if default_value is acceptable. If not returns default. for the column_name
         */
         //typecheck
-
+        let default_row_data = this.qp['default_fields'] || {}
+        if (! type_check.IsObject(default_row_data)) {default_row_data = {}}
         let def_object = {}
         let row_keys = Object.keys(default_row_data)
         for (var i = 0; i < row_keys.length; i++) {
@@ -62,26 +79,26 @@ class InputPayload {
             let defval = ReturnValidDefaultValue(dval)
             def_object[rowKey] = defval 
         }
-        return def_object
+        this.qp['default_fields'] = def_object
     }
-    Data(query_params, deep_scan = false) {
+    Data() {
         /*
-            row_data : {'column_name1': 'column_value1', 'column_name2': 'column_value2'}
+            data : [{'column_name1': 'column_value1', 'column_name2': 'column_value2'}]
         */
-        //add empty array?
-        let key = 'data'
-        if (!HasKey(query_params, key)) {return}
-        if (! sutil.IsArray(data)) {return false }
-        if (data.length === 0 ) {return true }
-        if (! deep_scan) { if (sutil.IsObject(data[0]) ) {return true } }
-        for (var i = 0; i < data.length; i++) { if (! sutil.IsObject(data[i]) ) {return false } }
-        return true
+        if (this.qp.hasOwnProperty('data')) {
+            let data = this.qp['data']
+            if (! type_check.IsArray(data)) { this.qp['data'] = [] }
+        } else { this.qp['data'] = [] }
     }
     SetFields(set_fields) {
-        //    "set_fields": "",  //array that has columns that should be used for set
-        let key = 'set_fields'
-        if (!HasKey(query_params, key)) {return}
-        return sutil.IsArray( key )
+        /*
+            //    "set_fields": "",  //array that has columns fields that should be used for set should be
+            array of strings
+        */
+        if (this.qp.hasOwnProperty('set_fields')) {
+            let x = this.qp['set_fields']
+            if (! type_check.IsArray(x)) { this.qp['set_fields'] = [] }
+        } else { this.qp['set_fields'] = [] }
     }
     Where() {
         /*
@@ -89,51 +106,67 @@ class InputPayload {
         "where": [{column_name:"valx1", operator:"=", value="value" },
                 {column_name:"valx2", operator:"in", value= ["value1", "value2"]}]
         */
-        let key = 'data'
-        if (!HasKey(query_params, 'crud_type')) {return}
+        if (this.qp.hasOwnProperty('where')) {
+            let x = this.qp['where']
+            if (! type_check.IsArray(x)) { this.qp['where'] = [] }
+        } else { this.qp['where'] = [] }
     }
     Offset(x) {
         /*
         "offset": "", //should be integer greater or equal to 0
         */
-        let key = 'offset'
-        if (!HasKey(query_params, 'crud_type')) {return}
-        return stuil.IsInteger(x)
+        if (this.qp.hasOwnProperty('offset')) {
+            let x = this.qp['offset']
+            if (! type_check.IsInteger(x)) { this.qp['offset'] = this.offset }
+        } else { this.qp['offset'] = this.offset }
     }
     Limit() {
         /* "limit": "", //should be positive integer */
-        let key = 'limit'
-        if (!HasKey(query_params, 'crud_type')) {return}
-        return stuil.IsInteger(x)
+        if (this.qp.hasOwnProperty('limit')) {
+            let x = this.qp['limit']
+            if (! type_check.IsInteger(x)) { this.qp['limit'] = this.limit }
+        } else { this.qp['limit'] = this.limit }
+
     }
     OrderBy() {
         /*
             "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
         */
-        let key = 'order_by'
-        if (!HasKey(query_params, 'crud_type')) {return}
+        if (this.qp.hasOwnProperty('order_by')) {
+            let x = this.qp['order_by']
+            if (! type_check.IsArray(x)) { this.qp['order_by'] = [] }
+        } else { this.qp['order_by'] = [] }
     }
     SearchFilter() {
         /*
         "search_filter": "", //string or object with quick filter type:
         */
-        let key = 'search_filter'
-        if (!HasKey(query_params, 'crud_type')) {return}
+        this.qp['search_filter'] = ""
     }
     SearchRank() {
         /*
         "search_rank": "", //bool
         */
-        let key = 'search_rank'
-        if (!HasKey(query_params, 'crud_type')) {return}
+        this.qp['search_rank'] = false
     }
-    ReturningValid() {
+    Returning() {
         /*
         "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
         */
-        let key = 'returning'
-        if (!HasKey(query_params, 'crud_type')) {return}
+        if (this.qp.hasOwnProperty('returning') ) {
+            let x = this.qp['returning']
+
+        } else { this.qp['returning'] = '*' }
     }
+    OnConflictAndContraint() {
+        /*
+        set constraint fields
+        */
+
+        //"do_nothing"
+    }
+
+
     ReturnValidDefaultValue(psql_reserved_constant) {
         /*
         if name in default_values list return value otherwise return default
@@ -149,9 +182,8 @@ class InputPayload {
         return 'default'
     }
 
-    InvalidQueryParamError(key_name) { throw new Error (`Invalid data type for query_params: ${key_name}`) }
+    InvalidQueryParamError(crud_type) { throw new Error (`Invalid crud_type for query_params: ${crud_type}`) }
 
-    HasKey( query_params, key_name ) { return query_params.hasOwnProperty( key_name )  }
 }
 
 module.exports = InputPayload

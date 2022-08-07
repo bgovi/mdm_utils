@@ -61,6 +61,7 @@ function ParseReturnParam(rp, return_array) {
     //parses returning_param
     if (typeof rp === 'string') { ParseStringValue(rp, return_array) }
     else if (Array.isArray(rp)) { ParseArrayValues(rp, return_array)}
+    else { return_array.push('*') }
 }
 
 
