@@ -37,6 +37,7 @@ async function RunQuery(query_string, replacements) {
         }
 
     } catch (e) {
+        // console.log(e)
         let pmsg  = e.parent
         let omsg  = e.original
         return String(pmsg)
@@ -50,7 +51,9 @@ async function RunQueryAppendData (out_data, error_data, query_string, replaceme
 
     */
     let value = await RunQuery(query_string, replacements)
-    if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
+    if (typeof value === 'string' || value instanceof String ) { 
+        error_data.push(value) 
+    }
     else {
         //if values is array i.e. return results from select. for loop
         if (type_check.IsArray(value) ) {

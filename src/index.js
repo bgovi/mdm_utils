@@ -16,13 +16,13 @@ NODE_ENV=production sudo node server.js
 */
 const express = require('express')
 const bodyParser = require("body-parser")
-// const compression = require('compression')
+const compression = require('compression')
 const port = 3000
 
-// const cors = require('cors')
+const cors = require('cors')
 const app = express()       //create express object
-// app.use(compression() )     //compresses and decompress data being sent back and forth
-// app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for downstream processing
+app.use(compression() )     //compresses and decompress data being sent back and forth
+app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for downstream processing
 
 //SetHttps['forwardHttps'](app)
 //initialize passport and routes
@@ -60,23 +60,16 @@ app.get('/', (req, res) => {
 app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
 
 
-app.post('/data/:schema_name/:table_name/:crud_type', (req, res) => {
-    try{
-        let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
-        //req.body
-        res.send(x)
-    } catch (e) {
-        //output_payload
-        res.send(e)
-    }
-})
+app.post('/data/:schema_name/:table_name/:crud_type', sqlorm.SqlOrmRoute )
+//all_route here
 
 //for json configurations.
-app.get('/grid/:project_name/:table_name/', (req, res) => {
+app.get('/grid/:project_name/:table_name/:page_num?', (req, res) => {
     /*
     Select string
     */
     try{
+        console.log(req.params.page_num)
         req.params.crud_type = "SELECT ALL ROWS"
         let x = req.params.project_name + ' ' + req.params.table_name
         res.send(x)

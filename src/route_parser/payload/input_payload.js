@@ -85,6 +85,7 @@ class InputPayload {
         /*
             data : [{'column_name1': 'column_value1', 'column_name2': 'column_value2'}]
         */
+        console.log(this.qp)
         if (this.qp.hasOwnProperty('data')) {
             let data = this.qp['data']
             if (! type_check.IsArray(data)) { this.qp['data'] = [] }

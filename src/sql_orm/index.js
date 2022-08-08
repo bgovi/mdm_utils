@@ -53,8 +53,8 @@ async function SqlOrmRoute(req, res, next) {
 
 async function Select(req, res, next) {
     /*
-
-
+    Main select function parses req.body which should be a json object or
+    json array.
     */
     let out_data   = []
     let error_data = []
@@ -62,8 +62,7 @@ async function Select(req, res, next) {
         let schema_name = req.params.schema_name
         let table_name  = req.params.table_name
         let crud_type   = 'select'
-        let query_params = req.body.data
-
+        let query_params = req.body
         let qp_array = ReturnQueryParamsArray(query_params)
         let qp = qp_array[0]
         rp.InputPayloadParser(qp)
@@ -79,8 +78,14 @@ async function Select(req, res, next) {
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
         res.json(output)
     } catch (e) {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
         let error_msg = String(e)
+        console.log(e)
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        console.log(output)
+        console.log(e)
         res.json(output)
     }
 }
@@ -97,19 +102,25 @@ async function Mutation (req, res, next) {
         let schema_name = req.params.schema_name
         let table_name  = req.params.table_name
         let crud_type   = req.params.crud_type
-        let query_params = req.body.data
+        let query_params = req.body
         let qp_array = ReturnQueryParamsArray(query_params)
         for (let i =0; i < qp_array.length; i++) {
             let qp = qp_array[i]
             rp.InputPayloadParser(qp)
             if (crud_type === 'insert' || crud_type === 'update' || crud_type === 'delete' ) { qp['crud_type'] = crud_type }
-            await Save(schema_name, table_name, query_params, out_data, error_data)
+            await Save(schema_name, table_name, qp, out_data, error_data)
         }
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
         res.json(output)
     } catch (e) {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = req.params.crud_type
         let error_msg = String(e)
+        console.log(e)
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        console.log(output)
+        console.log(e)
         res.json(output)
     }
 }
@@ -151,8 +162,14 @@ async function GetSelectRoute (req, res, next) {
         res.json(output)
 
     } catch (e) {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
+        console.log(e)
         let error_msg = String(e)
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        console.log(output)
+        console.log(e)
         res.json(output)
     }
 }
@@ -177,19 +194,21 @@ async function Save(schema_name, table_name, query_params, out_data, error_data)
     try{
         let data      = query_params['data']
         let crud_type = query_params['crud_type']
+        // console.log(query_params)
+        // console.log(data)
 
         if (crud_type === 'insert') {
             await Promise.all( data.map(row_data => {
-                Insert(schema_name, table_name, row_data, query_params, out_data, error_data )
+                return Insert(schema_name, table_name, row_data, query_params, out_data, error_data )
             }) )
         } else if (crud_type === 'update') {
             await Promise.all( data.map(row_data => {
-                Update(schema_name, table_name, row_data, query_params, out_data, error_data )
+                return Update(schema_name, table_name, row_data, query_params, out_data, error_data )
             }) )
 
         } else if (crud_type === 'delete') {
-            await Promise.all( req_body['delete'].map(data_row => {
-                Delete(schema_name, table_name, row_data, query_params, out_data, error_data )
+            await Promise.all( data.map(row_data => {
+                return Delete(schema_name, table_name, row_data, query_params, out_data, error_data )
             }) )
         }
         else {error_data.push(`Invalid schema, table, or crud_type: ${schema_name} ${table_name} ${crud_type}` )}
@@ -206,6 +225,7 @@ async function Insert(schema_name, table_name, row_data, insert_params, out_data
         let session_params = ParseToken()
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+        // console.log(sqlcmd)
         await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
     } catch (err) { error_data.push(String(err)) }
 }
