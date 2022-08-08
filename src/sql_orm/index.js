@@ -61,14 +61,15 @@ async function get_select (req, res, next) {
     let out_data   = []
     let error_data = []
     // res.send(schema_name)
-    await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
-    res.send(out_data)
+    let value = await dbcon.RunQuery(sqlcmd, values)
+    // await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
+    res.send(value)
     //for select from get route?
     // { "text": select_str, "values": values, "new_index": new_index }
 }
 
 function ParseToken() {
-    return {'app.user_id': 1, 'is_user_admin': false}
+    return {'app.user_id': 1, 'app.is_user_admin': false}
 }
 
 
