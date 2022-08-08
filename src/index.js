@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
 //     res.send(x)
 // })
 
-app.get('/data/:schema_name/:table_name/', sqlorm.get_select )
+app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
 
 
 app.post('/data/:schema_name/:table_name/:crud_type', (req, res) => {

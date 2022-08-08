@@ -29,46 +29,136 @@ let query_params = [
 */
 const rp             = require('../route_parser')
 const selectStm      = require('./select')
-// const insertStm      = require('./mutation/insert')
-// const deleteStm      = require('./mutation/delete')
-// const updateStm      = require('./mutation/update')
+const insertStm      = require('./mutation/insert')
+const deleteStm      = require('./mutation/delete')
+const updateStm      = require('./mutation/update')
 const transactionStm = require('./trans_stmt')
 const dbcon          = require('./dbcon')
+const type_check     = require('../sutils')
 
-
-function tx (req, res, next) {
-    let schema_name = req.params.schema_name
-    let table_name  = req.params.table_name
-    let crud_type   = req.params.crud_type
-
+async function SqlOrmRoute(req, res, next) {
+    try{
+        let crud_type   = req.params.crud_type
+        if (crud_type === 'select') { await Select(req, res, next)}
+        else { await Mutation (req, res, next) }
+    } catch (e) {
+        let schema_name = req.params.schema_name || ""
+        let table_name  = req.params.table_name  || ""
+        let crud_type   = req.params.crud_type   || ""
+        let error_msg   = String(e)
+        let output      = rp.ReturnOutput(schema_name, table_name,crud_type,[], [], error_msg)
+        res.json(output) 
+    }
 }
 
-async function get_select (req, res, next) {
-    // res.send('Hello World!')
-    console.log('hi')
-    let schema_name = req.params.schema_name
-    let table_name  = req.params.table_name
-    let crud_type   = 'select'
-    let qp = {'crud_type': crud_type}
-    rp.InputPayloadParser(qp)
-    console.log(qp)
-    let values = {}
-    let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
-    let session_params = ParseToken()
-    let query = x['text']
-    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
-    console.log(sqlcmd)
+async function Select(req, res, next) {
+    /*
+
+
+    */
     let out_data   = []
     let error_data = []
-    // res.send(schema_name)
-    let value = await dbcon.RunQuery(sqlcmd, values)
-    // await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
-    res.send(value)
-    //for select from get route?
-    // { "text": select_str, "values": values, "new_index": new_index }
+    try{
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
+        let query_params = req.body.data
+
+        let qp_array = ReturnQueryParamsArray(query_params)
+        let qp = qp_array[0]
+        rp.InputPayloadParser(qp)
+        let values = {}
+        let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+
+        let value = await dbcon.RunQuery(sqlcmd, values)
+        if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
+        else {out_data = value}
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
+        res.json(output)
+    } catch (e) {
+        let error_msg = String(e)
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        res.json(output)
+    }
+}
+
+
+async function Mutation (req, res, next) {
+    /*
+
+
+    */
+    let out_data   = []
+    let error_data = []
+    try {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = req.params.crud_type
+        let query_params = req.body.data
+        let qp_array = ReturnQueryParamsArray(query_params)
+        for (let i =0; i < qp_array.length; i++) {
+            let qp = qp_array[i]
+            rp.InputPayloadParser(qp)
+            if (crud_type === 'insert' || crud_type === 'update' || crud_type === 'delete' ) { qp['crud_type'] = crud_type }
+            await Save(schema_name, table_name, query_params, out_data, error_data)
+        }
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
+        res.json(output)
+    } catch (e) {
+        let error_msg = String(e)
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        res.json(output)
+    }
+}
+
+function ReturnQueryParamsArray(query_params) {
+    let qp_array = null
+    if (type_check.IsArray(query_params) ) {
+        qp_array = query_params
+    } else if ( type_check.IsObject(query_params) ) {
+        qp_array = [query_params]  
+    } else { throw 'Invalid body data type. Must be Array of objects or object'}
+    return qp_array
+}
+
+
+async function GetSelectRoute (req, res, next) {
+    let out_data   = []
+    let error_data = []
+    try {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
+        //optional index
+        let qp = {'crud_type': crud_type}
+
+
+        rp.InputPayloadParser(qp)
+        let values = {}
+        let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+
+        // res.send(schema_name)
+        let value = await dbcon.RunQuery(sqlcmd, values)
+        if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
+        else {out_data = value}
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
+        res.json(output)
+
+    } catch (e) {
+        let error_msg = String(e)
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        res.json(output)
+    }
 }
 
 function ParseToken() {
+    //placeholder for req.user
     return {'app.user_id': 1, 'app.is_user_admin': false}
 }
 
@@ -85,8 +175,8 @@ async function Save(schema_name, table_name, query_params, out_data, error_data)
     */
 
     try{
-        let data      = params['data']
-        let crud_type = params['crud_type']
+        let data      = query_params['data']
+        let crud_type = query_params['crud_type']
 
         if (crud_type === 'insert') {
             await Promise.all( data.map(row_data => {
@@ -94,17 +184,16 @@ async function Save(schema_name, table_name, query_params, out_data, error_data)
             }) )
         } else if (crud_type === 'update') {
             await Promise.all( data.map(row_data => {
-                Update( req, data_row, route_model, table_name,route_name, update_filter, saveParams)
+                Update(schema_name, table_name, row_data, query_params, out_data, error_data )
             }) )
 
         } else if (crud_type === 'delete') {
             await Promise.all( req_body['delete'].map(data_row => {
-                Delete( req, data_row, route_model, table_name,route_name, saveParams)
+                Delete(schema_name, table_name, row_data, query_params, out_data, error_data )
             }) )
         }
-    } catch (err) {
-        console.log(err) //main error?
-    }
+        else {error_data.push(`Invalid schema, table, or crud_type: ${schema_name} ${table_name} ${crud_type}` )}
+    } catch (err) { error_data.push(String(err) ) }
 }
 
 //Main Crud Functions
@@ -148,4 +237,4 @@ async function Delete(schema_name, table_name, row_data, delete_params, out_data
 }
 
 
-module.exports = {get_select}
+module.exports = {GetSelectRoute, SqlOrmRoute}
