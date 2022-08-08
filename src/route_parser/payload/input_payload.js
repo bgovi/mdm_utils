@@ -37,7 +37,7 @@ class InputPayload {
         this.qp = null
     }
     RunInit(query_params) {
-        if (  !type_check.IsObject(query_params) ) {this.qp = {}}
+        if (  !type_check.IsObject(query_params) ) { throw 'query paramas is not an object' }
         else{ this.qp = query_params }
         this.CrudType()
         this.DefaultFields()
@@ -57,7 +57,7 @@ class InputPayload {
             qp['crud_type'] = 'select'
             return
         }
-        InvalidQueryParamError(qp['crud_type'])
+        this.InvalidQueryParamError(qp['crud_type'])
     }
     DefaultFields() {
         /*
@@ -75,7 +75,7 @@ class InputPayload {
             let rowKey = row_keys[i]
             if ( ! idx.ValidIdentifier(rowKey)) { continue }
             let dval   = default_row_data[ rowKey ]
-            let defval = ReturnValidDefaultValue(dval)
+            let defval = this.ReturnValidDefaultValue(dval)
             def_object[rowKey] = defval 
         }
         this.qp['default_fields'] = def_object
@@ -152,9 +152,7 @@ class InputPayload {
         /*
         "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
         */
-        if (this.qp.hasOwnProperty('returning') ) {
-            let x = this.qp['returning']
-
+        if (this.qp.hasOwnProperty('returning') ) { //let x = this.qp['returning']
         } else { this.qp['returning'] = '*' }
     }
     OnConflictAndContraint() {
@@ -185,14 +183,17 @@ class InputPayload {
     
         if empty string return "''"
         */
-        for (var i = 0; i < default_values.length; i++) {
-            if (default_values[i] === psql_reserved_constant ) {
-                return default_values[i]
+        for (var i = 0; i < this.default_values.length; i++) {
+            if (this.default_values[i] === psql_reserved_constant ) {
+                return this.default_values[i]
             }
         }
         return 'default'
     }
-    InvalidQueryParamError(crud_type) { throw new Error (`Invalid crud_type for query_params: ${crud_type}`) }
+    InvalidQueryParamError(crud_type) { 
+        if (this.valid_crud_types.includes(crud_type)) {return}    
+        throw `Invalid crud_type for query_params: ${crud_type}`
+    }
 }
 
 module.exports = InputPayload
