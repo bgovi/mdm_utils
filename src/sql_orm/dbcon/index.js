@@ -5,7 +5,8 @@ const type_check = require('../../sutils')
 var types = require('pg').types;
 //timestamp object to string remove values after +
 types.setTypeParser(1184, function(stringValue) {
-    return stringValue.substring(0, stringValue.indexOf('+') )
+    // return stringValue.substring(0, stringValue.indexOf('+') )
+    return stringValue.substring(0, stringValue.indexOf('.') )
 });
 
 const Sequelize = require('sequelize')

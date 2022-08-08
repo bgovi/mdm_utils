@@ -72,5 +72,80 @@ function ParseToken() {
     return {'app.user_id': 1, 'app.is_user_admin': false}
 }
 
+//If query_params is array create for loop.
+//if crud_type is save if crud_type not available add to server error and continue?
+// var output = srf.ReturnOutput(insert_output, update_output, delete_output, upsert_output,table_name, route_name)
+// res.json(output)
+
+async function Save(schema_name, table_name, query_params, out_data, error_data){
+    /*
+    saveParams is a javascript object that contains parameters on how to run the insert, delete, update
+    and upsert functions. Its created by using CreateSaveParamsObject in each route. custom arguments and functions
+    can be added at the rotue level to specify specialy approaches to crud operations or disable routes entierly
+    */
+
+    try{
+        let data      = params['data']
+        let crud_type = params['crud_type']
+
+        if (crud_type === 'insert') {
+            await Promise.all( data.map(row_data => {
+                Insert(schema_name, table_name, row_data, query_params, out_data, error_data )
+            }) )
+        } else if (crud_type === 'update') {
+            await Promise.all( data.map(row_data => {
+                Update( req, data_row, route_model, table_name,route_name, update_filter, saveParams)
+            }) )
+
+        } else if (crud_type === 'delete') {
+            await Promise.all( req_body['delete'].map(data_row => {
+                Delete( req, data_row, route_model, table_name,route_name, saveParams)
+            }) )
+        }
+    } catch (err) {
+        console.log(err) //main error?
+    }
+}
+
+//Main Crud Functions
+async function Insert(schema_name, table_name, row_data, insert_params, out_data, error_data ) {
+    //main insert function.
+    try {
+        let index  = 0
+        let values = {}
+        let x = insertStm.InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+        await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
+    } catch (err) { error_data.push(String(err)) }
+}
+
+async function Update(schema_name, table_name, row_data, update_params, out_data, error_data ) {
+    //main insert function.
+    try {
+        let index  = 0
+        let values = {}
+        let x = updateStm.UpdateStatement(schema_name, table_name, row_data,values, index, update_params )
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+        await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
+    } catch (err) { error_data.push(String(err)) }
+}
+
+async function Delete(schema_name, table_name, row_data, delete_params, out_data, error_data ) {
+    //main insert function.
+    try {
+        let index  = 0
+        let values = {}
+        let x = deleteStm.DeleteStatement(schema_name, table_name, row_data,values, index, delete_params )
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+        await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
+    } catch (err) { error_data.push(String(err)) }
+}
+
 
 module.exports = {get_select}
