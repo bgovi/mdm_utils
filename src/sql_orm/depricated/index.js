@@ -18,6 +18,26 @@ help
 
 //return object
 
+/*
+
+Used to assemble transaction string.
+
+combines information from mutations and select statement
+
+
+BEGIN;
+set local app.user_id = 'id from user'
+
+query statement
+
+
+COMMIT;
+
+//RouteGuard
+
+
+*/
+
 
 function CrudNotAllowed(crud_name, table_name, route_name, row_node_id, row_id) {
     //used to return json object when crud operation is not permissiable. used when allow_* is false

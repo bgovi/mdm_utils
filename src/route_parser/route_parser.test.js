@@ -44,3 +44,10 @@ test('Is restricted schema', () =>
         expect(() => { rp.CheckRestrictedSchema(schema_name) } ).toThrow(schema_error)
     }  
 );
+
+test('route parser', () => {
+    let qp = {'crud_type': 'select'}
+    rp.InputPayloadParser(qp)
+    // console.log(qp)
+    expect(true).toBe(true)
+})

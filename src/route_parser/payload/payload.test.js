@@ -22,3 +22,23 @@ test('Is reserved column error', () =>
         expect(() => { px.IsReservedColumnError(column_name) } ).toThrow(column_error)
     }  
 );
+
+test('InputPayloadParser Default', () => {
+    let qp = {}
+    px.InputPayloadParser(qp)
+    console.log(qp)
+    expect(true).toBe(true) 
+});
+
+test('InputPayloadParser with values', () => {
+    let qp = {
+        'crud_type': 'insert',
+        'default_fields': {'x': 'current_time'},
+        'on_constraint': 'negative',
+        'data': [{'x': '1'}, {'x': '5'}],
+        'where': [{'column_name': 'x', 'operator': '=', 'value': '12'}]
+    }
+    px.InputPayloadParser(qp)
+    console.log(qp)
+    expect(true).toBe(true) 
+});

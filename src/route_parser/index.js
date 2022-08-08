@@ -111,6 +111,9 @@ module.exports = {
     "IsReservedOrInvalidColumn": IsReservedOrInvalidColumn,
     "IsReservedColumn": pload.IsReservedColumn,
     'DefaultObject': pload.DefaultObject,
-    'ReturnOutput': pload.ReturnOutput,
+    'ReturnOutput': pload.OutputPayload,
+    'OutputPayload': pload.OutputPayload,
+    'InputPayloadParser': pload.InputPayloadParser,
+
     'CheckRestrictedSchema': CheckRestrictedSchema
 }

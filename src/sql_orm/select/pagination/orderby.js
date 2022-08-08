@@ -2,8 +2,8 @@
     order_statements = [{'column1','asc}, {'column2':'a'}, {'column3':'desc'}, {'column4':'d'}]
 */
 
-const rp = require('../../route_parser')
-const sutil = require('../../sutils')
+const rp    = require('../../../route_parser')
+const sutil = require('../../../sutils')
 
 function OrderClause(order_statements) {
 
