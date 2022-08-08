@@ -37,6 +37,8 @@ const dbcon          = require('./dbcon')
 const type_check     = require('../sutils')
 
 async function SqlOrmRoute(req, res, next) {
+    //main route for post. diverts to select or mutation query based on
+    //crud_type
     try{
         let crud_type   = req.params.crud_type
         if (crud_type === 'select') { await Select(req, res, next)}
@@ -93,8 +95,8 @@ async function Select(req, res, next) {
 
 async function Mutation (req, res, next) {
     /*
-
-
+        Handles insert, update, delete.
+        truncate and execute are not implemented yet
     */
     let out_data   = []
     let error_data = []
@@ -126,6 +128,7 @@ async function Mutation (req, res, next) {
 }
 
 function ReturnQueryParamsArray(query_params) {
+    //makes query_params an array of objects
     let qp_array = null
     if (type_check.IsArray(query_params) ) {
         qp_array = query_params
@@ -137,6 +140,7 @@ function ReturnQueryParamsArray(query_params) {
 
 
 async function GetSelectRoute (req, res, next) {
+    //runs select command for get route
     let out_data   = []
     let error_data = []
     try {
@@ -186,9 +190,7 @@ function ParseToken() {
 
 async function Save(schema_name, table_name, query_params, out_data, error_data){
     /*
-    saveParams is a javascript object that contains parameters on how to run the insert, delete, update
-    and upsert functions. Its created by using CreateSaveParamsObject in each route. custom arguments and functions
-    can be added at the rotue level to specify specialy approaches to crud operations or disable routes entierly
+        Main function for handling mutations.
     */
 
     try{
