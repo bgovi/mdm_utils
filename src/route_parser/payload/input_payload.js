@@ -28,7 +28,7 @@ const idx = require('../indentifier_check')
 
 class InputPayload {
     constructor () {
-        this.valid_crud_types = ['insert','update','delete', 'execute','save']
+        this.valid_crud_types = ['insert','update','delete', 'execute','save', 'select']
         this.default_values   = [ 'default', 'current_timestamp', 'current_time','null',
             'current_date', 'localtime', 'localtimestamp', ""
         ]
@@ -50,6 +50,7 @@ class InputPayload {
         this.SetFields()
         this.Returning()
         this.OnConflictAndContraint()
+        this.BindType()
     }
     CrudType() {
         let qp = this.qp
@@ -193,6 +194,11 @@ class InputPayload {
     InvalidQueryParamError(crud_type) { 
         if (this.valid_crud_types.includes(crud_type)) {return}    
         throw `Invalid crud_type for query_params: ${crud_type}`
+    }
+    BindType() {
+        //replacement type for sequelize. options are :, $ or  --? was for nodepg. doesnt work for sequelize.
+        //replacement object always use object for values
+        this.qp['bind_type'] = ':'
     }
 }
 

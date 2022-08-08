@@ -27,11 +27,13 @@ let query_params = [
     ]
 
 */
+const rp             = require('../route_parser')
 const selectStm      = require('./select')
-const insertStm      = require('./mutation/insert')
-const deleteStm      = require('./mutation/delete')
-const updateStm      = require('./mutation/update')
+// const insertStm      = require('./mutation/insert')
+// const deleteStm      = require('./mutation/delete')
+// const updateStm      = require('./mutation/update')
 const transactionStm = require('./trans_stmt')
+const dbcon          = require('./dbcon')
 
 
 function tx (req, res, next) {
@@ -41,11 +43,33 @@ function tx (req, res, next) {
 
 }
 
-function get_select (req, res, next) {
+async function get_select (req, res, next) {
+    // res.send('Hello World!')
+    console.log('hi')
+    let schema_name = req.params.schema_name
+    let table_name  = req.params.table_name
+    let crud_type   = 'select'
+    let qp = {'crud_type': crud_type}
+    rp.InputPayloadParser(qp)
+    console.log(qp)
+    let values = {}
+    let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
+    let session_params = ParseToken()
+    let query = x['text']
+    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+    console.log(sqlcmd)
+    let out_data   = []
+    let error_data = []
+    // res.send(schema_name)
+    await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
+    res.send(out_data)
     //for select from get route?
+    // { "text": select_str, "values": values, "new_index": new_index }
+}
+
+function ParseToken() {
+    return {'app.user_id': 1, 'is_user_admin': false}
 }
 
 
-
-
-module.exports = {}
+module.exports = {get_select}

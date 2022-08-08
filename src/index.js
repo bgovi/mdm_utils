@@ -35,7 +35,7 @@ const app = express()       //create express object
 
 
 //SetHttps['startHttpsServer'](app)
-
+const sqlorm = require('./sql_orm')
 /*
 jwt_check
 route_parser
@@ -49,13 +49,16 @@ app.get('/', (req, res) => {
 })
 
 //app.use ? for grid
-app.get('/data/:schema_name/:table_name/', (req, res) => {
-    /*
-    Select string
-    */
-    let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
-    res.send(x)
-})
+// app.get('/data/:schema_name/:table_name/', (req, res) => {
+//     /*
+//     Select string
+//     */
+//     let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
+//     res.send(x)
+// })
+
+app.get('/data/:schema_name/:table_name/', sqlorm.get_select )
+
 
 app.post('/data/:schema_name/:table_name/:crud_type', (req, res) => {
     try{
@@ -63,6 +66,7 @@ app.post('/data/:schema_name/:table_name/:crud_type', (req, res) => {
         //req.body
         res.send(x)
     } catch (e) {
+        //output_payload
         res.send(e)
     }
 })
@@ -74,7 +78,7 @@ app.get('/grid/:project_name/:table_name/', (req, res) => {
     */
     try{
         req.params.crud_type = "SELECT ALL ROWS"
-        let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
+        let x = req.params.project_name + ' ' + req.params.table_name
         res.send(x)
     } catch (e) {
 

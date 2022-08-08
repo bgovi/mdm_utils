@@ -2,7 +2,7 @@
 Creates pagination  limit and offset statements
 
 */
-const sutil = require('../../sutils')
+const sutil = require('../../../sutils')
 
 function PaginationClause(limit_value, offset_value, max_limit = 100000) {
     /*
@@ -19,11 +19,10 @@ function PaginationClause(limit_value, offset_value, max_limit = 100000) {
 function CreateOffset( offset_value ) {
     let ox = offset_value
     if (sutil.IsInteger(ox) ) {
-        ox = parseInt(limit_value)
+        ox = parseInt(ox)
         if (ox < 0 ) { ox = 0 }
-    }
+    } else {ox = 0 }
     let sx = String(ox)
-    InvalidPaginaitionValueError(sx, 'OFFSET')
     return `OFFSET ${sx}`
 }
 
@@ -31,14 +30,11 @@ function CreateOffset( offset_value ) {
 
 function CreateLimit( limit_value, max_limit ) {
     InvalidMaxLimitError(max_limit)
-    let mx = parseInt(mx)
-    let lx = mx
-    if (sutil.IsInteger(limit_value) ) {
-        let tx = parseInt(limit_value)
-        if (tx > 0 && tx < mx ) { lx = tx }
-    }
+    let lx = parseInt( limit_value)
+    if (sutil.IsInteger(lx) ) {
+        if (lx < 0 || lx > max_limit ) { lx = max_limit }
+    } else {lx = max_limit}
     let sx = String(lx)
-    InvalidPaginaitionValueError(sx,'LIMIT')
     return `LIMIT ${sx}`
 }
 
