@@ -14,6 +14,9 @@ To start the server run:
 NODE_ENV=production sudo node server.js
 
 */
+
+// https://www.section.io/engineering-education/how-to-use-cors-in-nodejs-with-express/
+
 const express = require('express')
 const bodyParser = require("body-parser")
 const compression = require('compression')
@@ -32,6 +35,10 @@ app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for do
 // LoadDatabaseRoutes
 //LoadRoutes(app)
 //StaticRoutes(express, app , cors)
+
+app.use(cors({
+    origin: '*'
+}));
 
 
 //SetHttps['startHttpsServer'](app)
