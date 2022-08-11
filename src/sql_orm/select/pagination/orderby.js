@@ -1,5 +1,9 @@
 /*handles sort operations
     order_statements = [{'column1','asc}, {'column2':'a'}, {'column3':'desc'}, {'column4':'d'}]
+
+    order_statements = [{'column_name': 'colA', 'order_by': 'asc'},
+        {'column_name': 'column2', 'order_by': 'desc'} 
+    ]
 */
 
 const rp    = require('../../../route_parser')
@@ -12,14 +16,12 @@ function OrderClause(order_statements) {
     var order_list = []
     for (var i = 0; i < order_statements.length; i++) {
         let ox = order_statements[i]
-        if (! sutil.IsObject(ox) ) { throw new Error('order_statement value must be an object with key value pair') }
-        let cnames = Object.keys(ox)
-        for(var j =0; j< cnames.length; j++) {
-            let cn = cnames[j]
-            rp.CheckIdentifierError(cn)
-            let cv = ox[cn]
-            order_list.push( CreateOrderByString(cn, cv)  )
-        }
+        if (! sutil.IsObject(ox) ) { throw new Error('order_statement value must be an object') }
+        let column_name = ox['column_name']
+        let order_by    = ox['order_by']
+        if (column_name.trim() === "") {continue}
+        rp.CheckIdentifierError(column_name)
+        order_list.push( CreateOrderByString(column_name, order_by)  )
     }
     if (order_list.length > 0 ) {
         let order_string = 'ORDER BY ' + order_list.join(' , ')
