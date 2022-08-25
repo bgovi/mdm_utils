@@ -76,6 +76,7 @@ app.get('/grid/:project_name/:table_name/:page_num?', (req, res) => {
     Select string
     */
     try{
+
         console.log(req.params.page_num)
         req.params.crud_type = "SELECT ALL ROWS"
         let x = req.params.project_name + ' ' + req.params.table_name
@@ -85,6 +86,28 @@ app.get('/grid/:project_name/:table_name/:page_num?', (req, res) => {
     }
 
 })
+
+app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
+    /*
+    Select string
+    */
+    try{
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let id = req.params.id
+
+        let wx = [{'column_name': 'id', 'value': id, 'operator': '=' }]
+
+        let vx = await sqlorm.RouteGuard(schema_name, table_name, wx)
+
+        console.log(vx)
+        res.send(vx)
+    } catch (e) {
+
+    }
+
+})
+
 
 
 

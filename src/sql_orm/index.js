@@ -92,6 +92,86 @@ async function Select(req, res, next) {
     }
 }
 
+async function Exists(req, res, next) {
+    /*
+    Main select function parses req.body which should be a json object or
+    json array.
+    */
+    let out_data   = []
+    let error_data = []
+    try{
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
+        let query_params = req.body
+        let qp_array = ReturnQueryParamsArray(query_params)
+        let qp = qp_array[0]
+        rp.InputPayloadParser(qp)
+        let values = {}
+        let x = selectStm.ExistsStatement(schema_name, table_name, values, 0, qp)
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+
+        let value = await dbcon.RunQuery(sqlcmd, values)
+        if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
+        else {out_data = value}
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
+        res.json(output)
+    } catch (e) {
+        let schema_name = req.params.schema_name
+        let table_name  = req.params.table_name
+        let crud_type   = 'select'
+        let error_msg = String(e)
+        console.log(e)
+        let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, error_msg)
+        console.log(output)
+        console.log(e)
+        res.json(output)
+    }
+}
+
+async function RouteGuard(schema_name, table_name, where_array) {
+    /*
+    Main select function parses req.body which should be a json object or
+    json array.
+    where_array = [
+        {column_name: 'allow_insert', value = true, operator: '='}
+    ]
+
+    crud_type. allow_insert, allow_update, allow_delete, allow_select, ..etc
+    returns true or false
+    */
+    try{
+        let qp = {'where': where_array}
+        rp.InputPayloadParser(qp)
+        let values = {}
+        let x = selectStm.ExistsStatement(schema_name, table_name, values, 0, qp)
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+
+        let value = await dbcon.RunQuery(sqlcmd, values)
+        if (typeof value === 'string' || value instanceof String ) { 
+            console.log(value)
+            return false
+        }
+        let bool_val = value[0]['exists']
+        if (typeof bool_val === 'boolean') {return bool_val}
+        return false
+    } catch (e) {
+        let error_msg = `Exists query failed for user  ${schema_name}.${table_name}` 
+        console.log(e)
+        console.log(error_msg)
+        return false
+    }
+}
+
+
+
+
+
+
 
 async function Mutation (req, res, next) {
     /*
@@ -259,4 +339,4 @@ async function Delete(schema_name, table_name, row_data, delete_params, out_data
 }
 
 
-module.exports = {GetSelectRoute, SqlOrmRoute}
+module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard}
