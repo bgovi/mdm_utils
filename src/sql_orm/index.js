@@ -167,11 +167,42 @@ async function RouteGuard(schema_name, table_name, where_array) {
     }
 }
 
+async function GridConfiguration(where_array) {
+    /*
+    Main select function parses req.body which should be a json object or
+    json array.
+    where_array = [
+        {column_name: 'allow_insert', value = true, operator: '='}
+    ]
 
+    crud_type. allow_insert, allow_update, allow_delete, allow_select, ..etc
+    returns true or false
+    */
+    try{
+        let qp = {'where': where_array}
+        rp.InputPayloadParser(qp)
+        let values = {}
+        let x = selectStm.SelectStatement('app_admin', 'grid_config_rv', values, 0, qp)
+        let session_params = ParseToken()
+        let query = x['text']
+        let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
+        let value = await dbcon.RunQuery(sqlcmd, values)
+        if (typeof value === 'string' || value instanceof String ) { 
+            console.log(value)
+            return false
+        }
 
+        if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
 
-
+        return value
+    } catch (e) {
+        let error_msg = `Exists query failed for user  ${schema_name}.${table_name}` 
+        console.log(e)
+        console.log(error_msg)
+        return false
+    }
+}
 
 async function Mutation (req, res, next) {
     /*
@@ -217,7 +248,6 @@ function ReturnQueryParamsArray(query_params) {
     } else { throw 'Invalid body data type. Must be Array of objects or object'}
     return qp_array
 }
-
 
 async function GetSelectRoute (req, res, next) {
     //runs select command for get route
@@ -339,4 +369,4 @@ async function Delete(schema_name, table_name, row_data, delete_params, out_data
 }
 
 
-module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard}
+module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard, GridConfiguration}

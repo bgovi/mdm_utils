@@ -55,14 +55,6 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-//app.use ? for grid
-// app.get('/data/:schema_name/:table_name/', (req, res) => {
-//     /*
-//     Select string
-//     */
-//     let x = req.params.schema_name + ' ' + req.params.table_name + ' ' + req.params.crud_type
-//     res.send(x)
-// })
 
 app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
 
@@ -71,16 +63,19 @@ app.post('/data/:schema_name/:table_name/:crud_type', sqlorm.SqlOrmRoute )
 //all_route here
 
 //for json configurations.
-app.get('/grid/:project_name/:table_name/:page_num?', (req, res) => {
+app.get('/grid/:project_name/:table_name/', (req, res) => {
     /*
     Select string
     */
     try{
-
-        console.log(req.params.page_num)
-        req.params.crud_type = "SELECT ALL ROWS"
-        let x = req.params.project_name + ' ' + req.params.table_name
-        res.send(x)
+        let pn = req.params.project_name
+        let tn = req.params.table_name
+        let wx = [
+            {'column_name': 'project_name', 'value': pn, 'operator': '=' },
+            {'column_name': 'table_name',   'value': tn, 'operator': '=' },
+        ]
+        let config = await sqlorm.GridConfiguration(wx)
+        res.send(config)
     } catch (e) {
 
     }
