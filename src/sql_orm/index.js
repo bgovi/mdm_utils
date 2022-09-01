@@ -289,7 +289,7 @@ async function GetSelectRoute (req, res, next) {
 
 function ParseToken() {
     //placeholder for req.user
-    return {'app.user_id': 1, 'app.is_user_admin': false}
+    return {'app.user_id': 1, 'app.is_admin': true}
 }
 
 //If query_params is array create for loop.
