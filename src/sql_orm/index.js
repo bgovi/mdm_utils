@@ -293,6 +293,34 @@ function ParseToken() {
     return {'app.user_id': 1, 'app.is_admin': true}
 }
 
+async function FindUser(oauth_id) {
+    let session_params = ParseToken()
+    let query = "SELECT id, email, first_name, last_name, oauth_id, is_admin, is_active FROM app_admin.users where oauth_id = :oauth_id ;"
+    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+    let values = {'oauth_id': oauth_id}
+    let user = await dbcon.RunQuery(sqlcmd, values)
+    return user
+}
+
+async function UpdateUser(first_name, last_name, email, oauth_id) {
+    let session_params = ParseToken()
+    let query = "UPDATE app_admin.users SET first_name = :first_name , last_name = :last_name, email = :email WHERE oauth_id = :oauth_id ; RETURNING *"
+    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+    let values = {'oauth_id': oauth_id, 'first_name': first_name, 'last_name': last_name, 'email': email }
+    let user = await dbcon.RunQuery(sqlcmd, values)
+    return user
+}
+
+async function CreateUser(first_name, last_name, email, oauth_id) {
+    let session_params = ParseToken()
+    let query = `INSERT INTO app_admin.users (first_name, last_name, email, oauth_id) VALUES (:first_name, :last_name, :email, :oauth_id) RETURNING *;`
+    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+    let values = {'oauth_id': oauth_id, 'first_name': first_name, 'last_name': last_name, 'email': email }
+    let user = await dbcon.RunQuery(sqlcmd, values)
+    return user
+}
+
+
 //If query_params is array create for loop.
 //if crud_type is save if crud_type not available add to server error and continue?
 // var output = srf.ReturnOutput(insert_output, update_output, delete_output, upsert_output,table_name, route_name)
@@ -369,4 +397,4 @@ async function Delete(schema_name, table_name, row_data, delete_params, out_data
 }
 
 
-module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard, GridConfiguration}
+module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard, GridConfiguration, FindUser, UpdateUser, CreateUser}

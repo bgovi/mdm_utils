@@ -9,14 +9,12 @@ const srcRoot = appRoot + '/src'
 const passport = require('passport')
 var AzureOAuth2Strategy  = require("passport-azure-oauth2")
 var session = require('express-session')
-const {users, roles} = require(srcRoot + '/models') //users,roles
 const config = require(srcRoot + '/config/config.js')
 //loging protection function.
 const redis = require('redis')
 const redisStore = require('connect-redis')(session)
-
-
 var jwt = require("jwt-simple")
+const { UpdateUser, CreateUser, FindUser } = require('../../sql_orm')
 
 
 //******************
@@ -55,44 +53,32 @@ function InitializePassportJs(app,is_multicore) {
             //resource: config.azure.resource,
             //tenant: config.azure.tenant,
             callbackURL: 'https://url_name'
-        }, (accessToken, refreshToken, params, profile, done) => {
-                var userProfile = jwt.decode(params.id_token, "", true)
-                users.findOne({where: {oauth_id: userProfile.upn} }).then((currentUser) => {
-                    if(currentUser){
-                        // already have this user
-                        var firstName = userProfile.given_name
-                        var lastName = userProfile.family_name
-                        var email = userProfile.upn
-                        if (firstName !== currentUser.firstName || lastName !== currentUser.lastName ||
-                            email !== currentUser.email ) {
-                            currentUser.first_name = firstName
-                            currentUser.last_name = lastName
-                            currentUser.email = email
-                            currentUser.save().then( (updatedUser) => {
-                                console.log('updated user is ', updatedUser.email)
-                                done(null, updatedUser)
-                            })
-                        }
-                        console.log('user is: ', currentUser.email);
-                        //check if names are different?
-                        done(null, currentUser);
-                    } 
-                    //add else if for non iuhealth email
-                    else {
-                        console.log("Creating New User")
-                        var newUserData = {
-                            'oauth_id': userProfile.upn,
-                            'first_name': userProfile.given_name,
-                            'last_name': userProfile.family_name,
-                            'email': userProfile.upn,
-                            'role_id': 7 //7 Is new user status. 1 for admin must switch to user and give permissions.
-                        } 
-                        users.create(newUserData).then((newUser) => {
-                            console.log('created new user: ', newUser.email);
-                            done(null, newUser);
-                        })
-                    }
-                })
+        }, async (accessToken, refreshToken, params, profile, done) => {
+            var userProfile = jwt.decode(params.id_token, "", true)
+            //find one user
+            let firstName = userProfile.given_name
+            let lastName = userProfile.family_name
+            let email = userProfile.up
+
+            let oauth_id    = userProfile.upn
+            let currentUsers = await FindUser(oauth_id)
+            if (currentUsers.length === 0) {
+                console.log("Creating New User")
+                let newUsers = await CreateUser(first_name, last_name, email, oauth_id)
+                done(null, newUsers[0])
+
+            } else {
+                let currentUser = currentUsers[0]
+                if (firstName !== currentUser.firstName || lastName !== currentUser.lastName || email !== currentUser.email ) {
+                    let updatedUsers = await UpdateUser(first_name, last_name, email, oauth_id)
+                    let updatedUser  = updatedUsers[0]
+                    console.log('updated user is ', updatedUser.email)
+                    done(null, updatedUser)
+                } else {
+                    done(null, currentUser)
+                }
+
+            }
         })
     )
     

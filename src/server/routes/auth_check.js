@@ -24,7 +24,6 @@ function authCheck (req, res, next) {
         }
         res.redirect('/login')
     } else {
-        req.body['user_id'] = req.user.id
         next()
     }
 }
