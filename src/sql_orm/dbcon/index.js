@@ -14,15 +14,24 @@ const config = require('../../config/');
 const db = {}
 
 
-const sequelize = new Sequelize(
-    config.db.database,
-    config.db.user,
-    config.db.password,
-    config.db.options,
+// 'postgres://user:pass@example.com:5432/dbname') // Example for postgres
 
-)
+// const sequelize = new Sequelize(
+//     config.db.database,
+//     config.db.user,
+//     config.db.password,
+//     config.db.options,
+// )
+let host = `${config.db.host}`
+if (config.db.hasOwnProperty('port') ) {
+    host += `:${config.db.port}`
+}
 
-console.log(config.db)
+let conn_string = `postgresql://${config.db.user}:${config.db.password}@${host}/${config.db.database}`
+// console.log()
+
+// const sequelize = new Sequelize('postgresql://postgres:mysecretpassword@localhost:4432/postgres')
+const sequelize = new Sequelize(conn_string)
 
 async function RunQuery(query_string, replacements) {
     /*

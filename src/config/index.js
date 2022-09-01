@@ -1,11 +1,12 @@
+// psql postgresql://postgres:mysecretpassword@localhost:4432/postgres -f app_init.psql
+
 module.exports = {
     db: {
-        database: 'bgovi',
-        user: 'bgovi',
-        password: 'bgovi',
-        options: {
-            dialect: 'postgres',//'sqlite',
-            host: 'localhost',
-        }
+        database: 'postgres',
+        user: 'postgres',
+        password: 'mysecretpassword',
+        port: 4432,
+        // dialect: 'postgres',
+        host: 'localhost'
     }
 }

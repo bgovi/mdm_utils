@@ -63,7 +63,7 @@ app.post('/data/:schema_name/:table_name/:crud_type', sqlorm.SqlOrmRoute )
 //all_route here
 
 //for json configurations.
-app.get('/grid/:project_name/:table_name/', (req, res) => {
+app.get('/grid/:project_name/:table_name/', async (req, res) => {
     /*
     Select string
     */

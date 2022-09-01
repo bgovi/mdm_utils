@@ -177,9 +177,11 @@ async function GridConfiguration(where_array) {
 
     crud_type. allow_insert, allow_update, allow_delete, allow_select, ..etc
     returns true or false
+
+    return value: []
     */
     try{
-        let qp = {'where': where_array}
+        let qp = {'where': where_array, 'limit': 1}
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.SelectStatement('app_admin', 'grid_config_rv', values, 0, qp)
@@ -190,17 +192,14 @@ async function GridConfiguration(where_array) {
         let value = await dbcon.RunQuery(sqlcmd, values)
         if (typeof value === 'string' || value instanceof String ) { 
             console.log(value)
-            return false
+            return value
         }
-
-        if (typeof value === 'string' || value instanceof String ) { error_data.push(value) }
-
         return value
     } catch (e) {
-        let error_msg = `Exists query failed for user  ${schema_name}.${table_name}` 
+        let error_msg = `Grid configuration failed for to run ${where_array}` 
         console.log(e)
         console.log(error_msg)
-        return false
+        return error_msg
     }
 }
 
