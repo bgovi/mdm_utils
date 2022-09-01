@@ -5,18 +5,11 @@ This module exports the route for serving the Provider Effort App.
 
 //loging protection function.
 const path = require('path')
-const appRoot = require('app-root-path')
-const srcRoot = appRoot + '/src'
 
-
-var grid_dir = srcRoot + '/../client/grid/dist'
-var land_dir = srcRoot + '/../client/land_page/dist'
 
 //path to the client side build folder. Contains html file for user interface
 
-
-const landPath = path.join(__dirname, ' /../../../client/land_page/dist')
-const gridPath = path.join(__dirname, ' /../../../client/grid/dist')
+const gridPath = path.join(__dirname, ' /../../dist')
 
 
 
@@ -27,5 +20,4 @@ const gridPath = path.join(__dirname, ' /../../../client/grid/dist')
 //exports route protection for / and serves Web App if accepted
 module.exports = (express, app , cors) => {
     app.use(express.static(gridPath))
-    app.use(express.static(landPath))
 }

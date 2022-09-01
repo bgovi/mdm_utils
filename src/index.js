@@ -26,6 +26,9 @@ const cors = require('cors')
 const app = express()       //create express object
 app.use(compression() )     //compresses and decompress data being sent back and forth
 app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for downstream processing
+const path = require('path')
+
+
 
 //SetHttps['forwardHttps'](app)
 //initialize passport and routes
@@ -51,9 +54,11 @@ run_query
 */
 
 //app.use ? for grid js site
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+// app.get('/', (req, res) => {
+//     res.send('Hello World!')
+// })
+const gridPath = path.join(__dirname, '/dist')
+app.use(express.static(gridPath) )
 
 
 app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
@@ -103,8 +108,22 @@ app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
 
 })
 
+// https://stackoverflow.com/questions/31425284/express-static-vs-res-sendfile
 
+//send static file
+// console.log(gridPath)
+// app.use('/:project_name/:table_name', express.static(gridPath) )
+// const gridPath = path.join(__dirname, '/dist')
+console.log(gridPath)
 
+app.get( '/:project_name/:table_name', function(req,res) { res.sendFile(gridPath+ '/index.html') } )
+
+// app.use('/:project_name/:table_name',express.static(gridPath) )
+// app.use('/',(req,res,next) => {console.log('wtf'); next;}  ,express.static(gridPath))
+
+// app.use(express.static(gridPath) )
+// app.use('/',(req,res,next) => {console.log('wtf'); next;}  ,express.static(gridPath))
+// app.use(res.sendFile(gridPath))
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

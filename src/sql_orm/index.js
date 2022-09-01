@@ -289,6 +289,7 @@ async function GetSelectRoute (req, res, next) {
 
 function ParseToken() {
     //placeholder for req.user
+    //token credentials from req.body?
     return {'app.user_id': 1, 'app.is_admin': true}
 }
 
