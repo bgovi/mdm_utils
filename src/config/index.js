@@ -8,5 +8,11 @@ module.exports = {
         port: 4432,
         // dialect: 'postgres',
         host: 'localhost'
+    },
+    azure: {
+        clientID:    'id',
+        clientSecret: 'secret',
+        callbackURL: 'https://url_name',
+        cookieKey: 'random'
     }
 }

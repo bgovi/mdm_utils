@@ -9,7 +9,7 @@ const srcRoot = appRoot + '/src'
 const passport = require('passport')
 var AzureOAuth2Strategy  = require("passport-azure-oauth2")
 var session = require('express-session')
-const config = require(srcRoot + '/config/config.js')
+const config = require('../../config')
 //loging protection function.
 const redis = require('redis')
 const redisStore = require('connect-redis')(session)
@@ -31,17 +31,13 @@ function InitializePassportJs(app,is_multicore) {
 
     //deserializeUser takes the id from the cookie and searches the database for that user.
     //appends user role to user object if id is in database
-    passport.deserializeUser((id, done) => {
+    passport.deserializeUser( async (user, done) => {
         //search for user
-        users.findOne({ where: {'id': id}, include: [ {model: roles}]}).then((user) => { 
-            user['role_name'] = user.role.role_name
-            user['role_id'] = user.role.id
-            done(null,user)
-        } ).catch( (error) => {
-            done(null,false)
-        })
+            let currentUsers = await FindUserById(oauth_id)
+            done(null, user)
+    } )
         //done(null,{"blah":1} )
-    })
+    
 
     //Main Iniitialization object for azure OAuth. 
     passport.use("provider",
@@ -91,7 +87,7 @@ function InitializePassportJs(app,is_multicore) {
 
 
         app.use(session({
-            secret: config.session.cookieKey,
+            secret: config.azure.cookieKey,
             name: '_redisPractice',
             resave: false,
             saveUninitialized: true,
@@ -106,7 +102,7 @@ function InitializePassportJs(app,is_multicore) {
     else {
         //parameters used to create encrypted browser cookie. The cookie stores the login session
         app.use(session({ 
-            secret: config.session.cookieKey,
+            secret: config.azure.cookieKey,
             resave: false,
             saveUninitialized: true,
 

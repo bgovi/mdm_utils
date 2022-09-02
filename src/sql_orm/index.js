@@ -302,9 +302,19 @@ async function FindUser(oauth_id) {
     return user
 }
 
+async function FindUserById(id) {
+    let session_params = ParseToken()
+    let query = "SELECT id, email, first_name, last_name, oauth_id, is_admin, is_active FROM app_admin.users where id = :id ;"
+    let sqlcmd = transactionStm.CreateTransaction(query, session_params)
+    let values = {'id': id}
+    let user = await dbcon.RunQuery(sqlcmd, values)
+    return user
+}
+
+
 async function UpdateUser(first_name, last_name, email, oauth_id) {
     let session_params = ParseToken()
-    let query = "UPDATE app_admin.users SET first_name = :first_name , last_name = :last_name, email = :email WHERE oauth_id = :oauth_id ; RETURNING *"
+    let query = "UPDATE app_admin.users SET first_name = :first_name , last_name = :last_name, email = :email WHERE oauth_id = :oauth_id RETURNING *;"
     let sqlcmd = transactionStm.CreateTransaction(query, session_params)
     let values = {'oauth_id': oauth_id, 'first_name': first_name, 'last_name': last_name, 'email': email }
     let user = await dbcon.RunQuery(sqlcmd, values)
@@ -397,4 +407,4 @@ async function Delete(schema_name, table_name, row_data, delete_params, out_data
 }
 
 
-module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard, GridConfiguration, FindUser, UpdateUser, CreateUser}
+module.exports = {GetSelectRoute, SqlOrmRoute, RouteGuard, GridConfiguration, FindUser, FindUserById, UpdateUser, CreateUser}

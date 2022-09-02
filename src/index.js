@@ -57,6 +57,41 @@ run_query
 // app.get('/', (req, res) => {
 //     res.send('Hello World!')
 // })
+// app.get('/create_user/:oauth_id/:first_name', async (req, res) => {
+//     let first_name = req.params.first_name
+//     let oauth_id   = req.params.oauth_id
+//     let newUsers = await sqlorm.CreateUser(first_name, 'g', oauth_id, oauth_id)
+//     res.send(newUsers)
+//     }
+// )
+
+// app.get('/find_user/:oauth_id', async (req, res) => {
+//     let oauth_id = req.params.oauth_id
+//     let users = await sqlorm.FindUser(oauth_id)
+//     res.send(users)
+// }
+// )
+
+// app.get('/update_user/:oauth_id/:first_name', async (req, res) => {
+//     let first_name = req.params.first_name
+//     let oauth_id   = req.params.oauth_id
+//     let updatedUsers = await sqlorm.UpdateUser(first_name, 'g', oauth_id, oauth_id)
+//     res.send(updatedUsers)
+
+// }
+// )
+
+// app.get('/find_uid/:id', async (req, res) => {
+//     let id = req.params.id
+//     let users = await sqlorm.FindUserById(id)
+//     res.send(users)
+
+// }
+// )
+
+
+
+
 const gridPath = path.join(__dirname, '/dist')
 app.use(express.static(gridPath) )
 
