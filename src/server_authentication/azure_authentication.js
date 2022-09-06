@@ -29,13 +29,17 @@ function InitializePassportJs(app,is_multicore) {
 
     //deserializeUser takes the id from the cookie and searches the database for that user.
     //appends user role to user object if id is in database
-    passport.deserializeUser( async (user, done) => {
+    passport.deserializeUser( async (id, done) => {
         //search for user
-            let currentUsers = await FindUserById(oauth_id)
+        try{
+            let users = await FindUserById(id)
+            let user = users[0]
             done(null, user)
-    } )
-        //done(null,{"blah":1} )
-    
+        } catch (e) {
+            console.log(e)
+            return done(e)
+        }
+    } )    
 
     //Main Iniitialization object for azure OAuth. 
     passport.use("provider",
@@ -49,30 +53,36 @@ function InitializePassportJs(app,is_multicore) {
             //tenant: config.azure.tenant,
             callbackURL: 'https://iuhpcbia.azurewebsites.net/auth/azure/redirect'
         }, async (accessToken, refreshToken, params, profile, done) => {
-            var userProfile = jwt.decode(params.id_token, "", true)
-            //find one user
-            let firstName = userProfile.given_name
-            let lastName = userProfile.family_name
-            let email = userProfile.up
+            try{
 
-            let oauth_id    = userProfile.upn
-            let currentUsers = await FindUser(oauth_id)
-            if (currentUsers.length === 0) {
-                console.log("Creating New User")
-                let newUsers = await CreateUser(first_name, last_name, email, oauth_id)
-                done(null, newUsers[0])
 
-            } else {
-                let currentUser = currentUsers[0]
-                if (firstName !== currentUser.firstName || lastName !== currentUser.lastName || email !== currentUser.email ) {
-                    let updatedUsers = await UpdateUser(first_name, last_name, email, oauth_id)
-                    let updatedUser  = updatedUsers[0]
-                    console.log('updated user is ', updatedUser.email)
-                    done(null, updatedUser)
+                var userProfile = jwt.decode(params.id_token, "", true)
+                //find one user
+                let firstName = userProfile.given_name
+                let lastName = userProfile.family_name
+                let email = userProfile.up
+
+                let oauth_id    = userProfile.upn
+                let currentUsers = await FindUser(oauth_id)
+                if (currentUsers.length === 0) {
+                    console.log("Creating New User")
+                    let newUsers = await CreateUser(first_name, last_name, email, oauth_id)
+                    done(null, newUsers[0])
+
                 } else {
-                    done(null, currentUser)
+                    let currentUser = currentUsers[0]
+                    if (firstName !== currentUser.firstName || lastName !== currentUser.lastName || email !== currentUser.email ) {
+                        let updatedUsers = await UpdateUser(first_name, last_name, email, oauth_id)
+                        let updatedUser  = updatedUsers[0]
+                        console.log('updated user is ', updatedUser.email)
+                        done(null, updatedUser)
+                    } else {
+                        done(null, currentUser)
+                    }
                 }
-
+            } catch (e) {
+                console.log(e)
+                done(e)
             }
         })
     )

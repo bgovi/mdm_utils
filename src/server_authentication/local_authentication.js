@@ -51,7 +51,7 @@ function InitializePassportJs(app,is_multicore = false) {
 
         } catch (e) {
             console.log(e)
-            return done(err)
+            return done(e)
         }
     }) 
 
