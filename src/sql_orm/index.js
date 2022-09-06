@@ -70,7 +70,7 @@ async function Select(req, res, next) {
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
@@ -109,7 +109,7 @@ async function Exists(req, res, next) {
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.ExistsStatement(schema_name, table_name, values, 0, qp)
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
@@ -131,7 +131,7 @@ async function Exists(req, res, next) {
     }
 }
 
-async function RouteGuard(schema_name, table_name, where_array) {
+async function RouteGuard(schema_name, table_name, where_array, req) {
     /*
     Main select function parses req.body which should be a json object or
     json array.
@@ -147,13 +147,13 @@ async function RouteGuard(schema_name, table_name, where_array) {
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.ExistsStatement(schema_name, table_name, values, 0, qp)
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
         let value = await dbcon.RunQuery(sqlcmd, values)
         if (typeof value === 'string' || value instanceof String ) { 
-            console.log(value)
+            //console.log(value)
             return false
         }
         let bool_val = value[0]['exists']
@@ -167,7 +167,7 @@ async function RouteGuard(schema_name, table_name, where_array) {
     }
 }
 
-async function GridConfiguration(where_array) {
+async function GridConfiguration(where_array, req) {
     /*
     Main select function parses req.body which should be a json object or
     json array.
@@ -181,11 +181,15 @@ async function GridConfiguration(where_array) {
     return value: []
     */
     try{
-        let qp = {'where': where_array, 'limit': 1}
+        let qp = {'where': where_array, 'limit': 1, 'bind_type': ':'}
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.SelectStatement('app_admin', 'grid_config_rv', values, 0, qp)
-        let session_params = ParseToken()
+        // console.log('values')
+        // console.log(values)
+        // console.log('hi')
+        let session_params = ParseToken(req)
+        //console.log(session_params)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
@@ -220,7 +224,7 @@ async function Mutation (req, res, next) {
             let qp = qp_array[i]
             rp.InputPayloadParser(qp)
             if (crud_type === 'insert' || crud_type === 'update' || crud_type === 'delete' ) { qp['crud_type'] = crud_type }
-            await Save(schema_name, table_name, qp, out_data, error_data)
+            await Save(schema_name, table_name, qp, out_data, error_data, req)
         }
         let output = rp.ReturnOutput(schema_name, table_name,crud_type,out_data, error_data, "")
         res.json(output)
@@ -263,7 +267,7 @@ async function GetSelectRoute (req, res, next) {
         rp.InputPayloadParser(qp)
         let values = {}
         let x = selectStm.SelectStatement(schema_name, table_name, values, 0, qp)
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
 
@@ -287,23 +291,27 @@ async function GetSelectRoute (req, res, next) {
     }
 }
 
-function ParseToken() {
+function ParseToken(req) {
     //placeholder for req.user
     //token credentials from req.body?
-    return {'app.user_id': 1, 'app.is_admin': true}
+    let user = req.user
+    let user_id = user['id']
+    let is_admin = user['is_admin']
+    return {'app.user_id': user_id, 'app.is_admin': is_admin}
+    // return {'app.user_id': 1, 'app.is_admin': true}
 }
 
 async function FindUser(oauth_id) {
-    let session_params = ParseToken()
+    let session_params = {} // ParseToken()
     let query = "SELECT id, email, first_name, last_name, oauth_id, is_admin, is_active FROM app_admin.users where oauth_id = :oauth_id ;"
     let sqlcmd = transactionStm.CreateTransaction(query, session_params)
     let values = {'oauth_id': oauth_id}
-    let user = await dbcon.RunQuery(sqlcmd, values)
-    return user
+    let users = await dbcon.RunQuery(sqlcmd, values)
+    return users
 }
 
 async function FindUserById(id) {
-    let session_params = ParseToken()
+    let session_params = {} // ParseToken()
     let query = "SELECT id, email, first_name, last_name, oauth_id, is_admin, is_active FROM app_admin.users where id = :id ;"
     let sqlcmd = transactionStm.CreateTransaction(query, session_params)
     let values = {'id': id}
@@ -313,7 +321,7 @@ async function FindUserById(id) {
 
 
 async function UpdateUser(first_name, last_name, email, oauth_id) {
-    let session_params = ParseToken()
+    let session_params = {} // ParseToken()
     let query = "UPDATE app_admin.users SET first_name = :first_name , last_name = :last_name, email = :email WHERE oauth_id = :oauth_id RETURNING *;"
     let sqlcmd = transactionStm.CreateTransaction(query, session_params)
     let values = {'oauth_id': oauth_id, 'first_name': first_name, 'last_name': last_name, 'email': email }
@@ -322,7 +330,7 @@ async function UpdateUser(first_name, last_name, email, oauth_id) {
 }
 
 async function CreateUser(first_name, last_name, email, oauth_id) {
-    let session_params = ParseToken()
+    let session_params = {} //ParseToken()
     let query = `INSERT INTO app_admin.users (first_name, last_name, email, oauth_id) VALUES (:first_name, :last_name, :email, :oauth_id) RETURNING *;`
     let sqlcmd = transactionStm.CreateTransaction(query, session_params)
     let values = {'oauth_id': oauth_id, 'first_name': first_name, 'last_name': last_name, 'email': email }
@@ -336,7 +344,7 @@ async function CreateUser(first_name, last_name, email, oauth_id) {
 // var output = srf.ReturnOutput(insert_output, update_output, delete_output, upsert_output,table_name, route_name)
 // res.json(output)
 
-async function Save(schema_name, table_name, query_params, out_data, error_data){
+async function Save(schema_name, table_name, query_params, out_data, error_data, req){
     /*
         Main function for handling mutations.
     */
@@ -349,16 +357,16 @@ async function Save(schema_name, table_name, query_params, out_data, error_data)
 
         if (crud_type === 'insert') {
             await Promise.all( data.map(row_data => {
-                return Insert(schema_name, table_name, row_data, query_params, out_data, error_data )
+                return Insert(schema_name, table_name, row_data, query_params, out_data, error_data, req )
             }) )
         } else if (crud_type === 'update') {
             await Promise.all( data.map(row_data => {
-                return Update(schema_name, table_name, row_data, query_params, out_data, error_data )
+                return Update(schema_name, table_name, row_data, query_params, out_data, error_data, req )
             }) )
 
         } else if (crud_type === 'delete') {
             await Promise.all( data.map(row_data => {
-                return Delete(schema_name, table_name, row_data, query_params, out_data, error_data )
+                return Delete(schema_name, table_name, row_data, query_params, out_data, error_data, req )
             }) )
         }
         else {error_data.push(`Invalid schema, table, or crud_type: ${schema_name} ${table_name} ${crud_type}` )}
@@ -366,13 +374,13 @@ async function Save(schema_name, table_name, query_params, out_data, error_data)
 }
 
 //Main Crud Functions
-async function Insert(schema_name, table_name, row_data, insert_params, out_data, error_data ) {
+async function Insert(schema_name, table_name, row_data, insert_params, out_data, error_data, req ) {
     //main insert function.
     try {
         let index  = 0
         let values = {}
         let x = insertStm.InsertStatement(schema_name, table_name, row_data,values, index, insert_params )
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
         // console.log(sqlcmd)
@@ -380,26 +388,26 @@ async function Insert(schema_name, table_name, row_data, insert_params, out_data
     } catch (err) { error_data.push(String(err)) }
 }
 
-async function Update(schema_name, table_name, row_data, update_params, out_data, error_data ) {
+async function Update(schema_name, table_name, row_data, update_params, out_data, error_data, req ) {
     //main insert function.
     try {
         let index  = 0
         let values = {}
         let x = updateStm.UpdateStatement(schema_name, table_name, row_data,values, index, update_params )
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
         await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)
     } catch (err) { error_data.push(String(err)) }
 }
 
-async function Delete(schema_name, table_name, row_data, delete_params, out_data, error_data ) {
+async function Delete(schema_name, table_name, row_data, delete_params, out_data, error_data, req ) {
     //main insert function.
     try {
         let index  = 0
         let values = {}
         let x = deleteStm.DeleteStatement(schema_name, table_name, row_data,values, index, delete_params )
-        let session_params = ParseToken()
+        let session_params = ParseToken(req)
         let query = x['text']
         let sqlcmd = transactionStm.CreateTransaction(query, session_params)
         await dbcon.RunQueryAppendData (out_data, error_data, sqlcmd, values)

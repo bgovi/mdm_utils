@@ -3,14 +3,12 @@ This module handles authentication (login/logout) for the Provider Effort App.
 Authentication cookies is created using express-session.
 
 */
-const appRoot = require('app-root-path')
-const srcRoot = appRoot + '/src'
+
 
 const passport = require('passport')
 var AzureOAuth2Strategy  = require("passport-azure-oauth2")
-var session = require('express-session')
 const config = require('../../config')
-//loging protection function.
+const SetSession = require('./set_session')
 const redis = require('redis')
 const redisStore = require('connect-redis')(session)
 var jwt = require("jwt-simple")
@@ -42,13 +40,14 @@ function InitializePassportJs(app,is_multicore) {
     //Main Iniitialization object for azure OAuth. 
     passport.use("provider",
         new AzureOAuth2Strategy({
-
-
+            // 1. If the user not found, done (null, false)
+            // 2. If the password does not match, done (null, false)
+            // 3. If user found and password match, done (null, user)
             clientID:  config.azure.clientID,
             clientSecret: config.azure.clientSecret,
             //resource: config.azure.resource,
             //tenant: config.azure.tenant,
-            callbackURL: 'https://url_name'
+            callbackURL: 'https://iuhpcbia.azurewebsites.net/auth/azure/redirect'
         }, async (accessToken, refreshToken, params, profile, done) => {
             var userProfile = jwt.decode(params.id_token, "", true)
             //find one user
@@ -77,38 +76,7 @@ function InitializePassportJs(app,is_multicore) {
             }
         })
     )
-    
-    if (is_multicore) {
-        const redisClient = redis.createClient()
-        redisClient.on('error', (err) => {
-            console.log('Redis error: ', err);
-          });
-
-
-
-        app.use(session({
-            secret: config.azure.cookieKey,
-            name: '_redisPractice',
-            resave: false,
-            saveUninitialized: true,
-            cookie: { secure: false }, // Note that the cookie-parser module is no longer needed
-            store: new redisStore({ host: 'localhost', port: 6379, client: redisClient, ttl: 864000 }),
-          }));
-
-
-
-
-    }
-    else {
-        //parameters used to create encrypted browser cookie. The cookie stores the login session
-        app.use(session({ 
-            secret: config.azure.cookieKey,
-            resave: false,
-            saveUninitialized: true,
-
-        }))
-    }
-
+    SetSession(app, is_multicore)
     // initialize passport
     app.use(passport.initialize());
     app.use(passport.session());
@@ -131,8 +99,7 @@ function LoginLogOutRoutes(app) {
     }
     ))
 
-
-    // callback route for azyre to redirect to
+    // callback route for azure to redirect to
     // hand control to passport to use code to grab profile info
     app.get('/auth/azure/redirect', passport.authenticate('provider',
     ), (req, res) => {

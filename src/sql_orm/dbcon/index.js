@@ -28,7 +28,7 @@ if (config.db.hasOwnProperty('port') ) {
 }
 
 let conn_string = `postgresql://${config.db.user}:${config.db.password}@${host}/${config.db.database}`
-// console.log()
+console.log(conn_string)
 
 // const sequelize = new Sequelize('postgresql://postgres:mysecretpassword@localhost:4432/postgres')
 const sequelize = new Sequelize(conn_string)

@@ -29,7 +29,7 @@ function SessionParams( session_params ) {
     for(let i =0; i < keys.length; i++ ) {
         let val = session_params[ keys[i] ]
         if (typeof val === 'number' || typeof val === 'boolean') { out.push(`SET LOCAL ${keys[i]}=${val};`)
-        } else { out.push(`SET LOCAL ${keys[i]}=$$${val}$$;` ) }
+        } else { out.push(`SET LOCAL ${keys[i]}=${val};` ) }
     }
     let session_stm = out.join('\n')
     return session_stm
