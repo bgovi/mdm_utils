@@ -58,7 +58,7 @@ function InitializePassportJs(app,is_multicore) {
                 //find one user
                 let firstName = userProfile.given_name
                 let lastName = userProfile.family_name
-                let email = userProfile.up
+                let email = userProfile.upn
 
                 let oauth_id    = userProfile.upn
                 let currentUsers = await FindUser(oauth_id)

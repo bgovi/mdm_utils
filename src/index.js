@@ -22,6 +22,9 @@ const bodyParser = require("body-parser")
 const compression = require('compression')
 const port = 3000
 
+// console.log('env variables')
+// console.log(process.env)
+
 const cors = require('cors')
 const app = express()       //create express object
 app.use(compression() )     //compresses and decompress data being sent back and forth
