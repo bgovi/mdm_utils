@@ -3,7 +3,7 @@
 module.exports = {
     db: {
         database: process.env.DATABASE || 'postgres',
-        user: process.env.USER || 'postgres',
+        user: process.env.DBUSER || 'postgres',
         password: process.env.PASSWORD || 'mysecretpassword',
         port: process.env.PORT || 4432,
         host: process.env.HOST || 'localhost'
