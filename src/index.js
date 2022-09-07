@@ -16,7 +16,7 @@ NODE_ENV=production sudo node server.js
 */
 
 // https://www.section.io/engineering-education/how-to-use-cors-in-nodejs-with-express/
-
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require("body-parser")
 const compression = require('compression')
@@ -36,14 +36,12 @@ const azureAuth = require('./server_authentication/azure_authentication')
 const sqlorm = require('./sql_orm')
 
 function authCheck (req, res, next) {
-    //reroute to login if not logged in or send error message if accessing data
-    //add user it to req.body
     if(!req.user){ res.redirect('/login') } 
     else { next() }
 }
 if (process.env.NODE_ENV === 'production') { azureAuth(app) }
 else { localAuth(app) }
-
+app.all('*', authCheck )
 
 
 //Initialize Passport
@@ -55,7 +53,7 @@ else { localAuth(app) }
 // }));
 
 //adds auth check to all routes below
-app.all('*', authCheck )
+
 
 
 const gridPath = path.join(__dirname, '/dist')
