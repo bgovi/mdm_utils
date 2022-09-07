@@ -13,9 +13,10 @@ function CreateTransaction(query, session_params) {
     //check session_user_id
     //let query = xyz
     let session_stm = SessionParams(session_params)
-    let transaction = `
+    let transaction = `BEGIN;
     ${session_stm}
     ${query}
+    COMMIT;
     `
     return transaction
 }
@@ -27,8 +28,8 @@ function SessionParams( session_params ) {
     let out = []
     for(let i =0; i < keys.length; i++ ) {
         let val = session_params[ keys[i] ]
-        if (typeof val === 'number' || typeof val === 'boolean') { out.push(`SET ${keys[i]}=${val};`)
-        } else { out.push(`SET ${keys[i]}=${val};` ) }
+        if (typeof val === 'number' || typeof val === 'boolean') { out.push(`SET LOCAL ${keys[i]}=${val};`)
+        } else { out.push(`SET LOCAL ${keys[i]}=${val};` ) }
     }
     let session_stm = out.join('\n')
     return session_stm
