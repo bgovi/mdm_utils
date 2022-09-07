@@ -2,17 +2,15 @@
 
 module.exports = {
     db: {
-        database: 'postgres',
-        user: 'postgres',
-        password: 'mysecretpassword',
-        port: 4432,
-        // dialect: 'postgres',
-        host: 'localhost'
+        database: process.env.DATABASE || 'postgres',
+        user: process.env.USER || 'postgres',
+        password: process.env.PASSWORD || 'mysecretpassword',
+        port: process.env.PORT || 4432,
+        host: process.env.HOST || 'localhost'
     },
     azure: {
-        clientID:    'id',
-        clientSecret: 'secret',
-        callbackURL: 'https://url_name',
-        cookieKey: 'random'
+        clientID:  process.env.CLIENTID ||  'id',
+        clientSecret: process.env.CLIENT_SECRET || 'secret',
+        cookieKey: process.env.COOKIEKEY || 'random'
     }
 }

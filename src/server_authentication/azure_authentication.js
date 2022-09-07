@@ -7,12 +7,10 @@ Authentication cookies is created using express-session.
 
 const passport = require('passport')
 var AzureOAuth2Strategy  = require("passport-azure-oauth2")
-const config = require('../../config')
+const config = require('../config')
 const SetSession = require('./set_session')
-const redis = require('redis')
-const redisStore = require('connect-redis')(session)
 var jwt = require("jwt-simple")
-const { UpdateUser, CreateUser, FindUser } = require('../../sql_orm')
+const { UpdateUser, CreateUser, FindUser } = require('../sql_orm')
 
 
 //******************
@@ -90,6 +88,7 @@ function InitializePassportJs(app,is_multicore) {
     // initialize passport
     app.use(passport.initialize());
     app.use(passport.session());
+    LoginLogOutRoutes(app)
 
 }
 
@@ -117,10 +116,6 @@ function LoginLogOutRoutes(app) {
     })
 }
 
-
 //Initializes PassportJs and Authentication Routes.
-module.exports = (app,is_multicore=false) => {
-    InitializePassportJs(app, is_multicore)
-    LoginLogOutRoutes(app)
-}
+module.exports = InitializePassportJs
 

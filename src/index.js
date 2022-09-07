@@ -29,6 +29,7 @@ app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for do
 app.use(bodyParser.urlencoded({ extended: false }))
 const path = require('path')
 const localAuth = require('./server_authentication/local_authentication')
+const azureAuth = require('./server_authentication/azure_authentication')
 
 
 //SetHttps['startHttpsServer'](app)
@@ -40,15 +41,18 @@ function authCheck (req, res, next) {
     if(!req.user){ res.redirect('/login') } 
     else { next() }
 }
+if (process.env.NODE_ENV === 'production') { azureAuth(app) }
+else { localAuth(app) }
 
-localAuth(app)
+
+
 //Initialize Passport
 //if prod
 
 //else if dev
-app.use(cors({
-    origin: '*'
-}));
+// app.use(cors({
+//     origin: '*'
+// }));
 
 //adds auth check to all routes below
 app.all('*', authCheck )
@@ -115,7 +119,6 @@ app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
 console.log(gridPath)
 
 app.get( '/:project_name/:table_name', function(req,res) { 
-    console.log('index')
     res.sendFile(gridPath+ '/index.html') } )
 
 // app.use('/:project_name/:table_name',express.static(gridPath) )
