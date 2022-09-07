@@ -294,11 +294,11 @@ async function GetSelectRoute (req, res, next) {
 function ParseToken(req) {
     //placeholder for req.user
     //token credentials from req.body?
-    // let user = req.user
-    // let user_id = user['id']
-    // let is_admin = user['is_admin']
-    // return {'app.user_id': user_id, 'app.is_admin': is_admin}
-    return {'app.user_id': 1, 'app.is_admin': true}
+    let user = req.user
+    let user_id = user['id']
+    let is_admin = user['is_admin']
+    return {'app.user_id': user_id, 'app.is_admin': is_admin}
+    // return {'app.user_id': 1, 'app.is_admin': true}
 }
 
 async function FindUser(oauth_id) {
