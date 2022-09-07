@@ -8,6 +8,8 @@ types.setTypeParser(1184, function(stringValue) {
     // return stringValue.substring(0, stringValue.indexOf('+') )
     return stringValue.substring(0, stringValue.indexOf('.') )
 });
+//keep date as string
+types.setTypeParser(1082,'text',function(text) {return text;});
 
 const Sequelize = require('sequelize')
 const config = require('../../config/');
