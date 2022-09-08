@@ -45,6 +45,7 @@ function InitializePassportJs(app,is_multicore) {
             // 1. If the user not found, done (null, false)
             // 2. If the password does not match, done (null, false)
             // 3. If user found and password match, done (null, user)
+            useCommonEndpoint: 'https://login.microsoftonline.com/d9d47063-3f5e-4de9-bf99-f083657fa0fe/oauth2/v2.0/authorize',
             clientID:  config.azure.clientID,
             clientSecret: config.azure.clientSecret,
             //resource: config.azure.resource,
@@ -53,8 +54,9 @@ function InitializePassportJs(app,is_multicore) {
         }, async (accessToken, refreshToken, params, profile, done) => {
             try{
 
-
+                console.log('azure oauth entry')
                 var userProfile = jwt.decode(params.id_token, "", true)
+                console.log(userProfile)
                 //find one user
                 let firstName = userProfile.given_name
                 let lastName = userProfile.family_name
@@ -62,15 +64,16 @@ function InitializePassportJs(app,is_multicore) {
 
                 let oauth_id    = userProfile.upn
                 let currentUsers = await FindUser(oauth_id)
+                console.log(currentUsers)
                 if (currentUsers.length === 0) {
                     console.log("Creating New User")
-                    let newUsers = await CreateUser(first_name, last_name, email, oauth_id)
+                    let newUsers = await CreateUser(firstName, lastName, email, oauth_id)
                     done(null, newUsers[0])
 
                 } else {
                     let currentUser = currentUsers[0]
                     if (firstName !== currentUser.firstName || lastName !== currentUser.lastName || email !== currentUser.email ) {
-                        let updatedUsers = await UpdateUser(first_name, last_name, email, oauth_id)
+                        let updatedUsers = await UpdateUser(firstName, lastName, email, oauth_id)
                         let updatedUser  = updatedUsers[0]
                         console.log('updated user is ', updatedUser.email)
                         done(null, updatedUser)

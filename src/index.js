@@ -31,21 +31,36 @@ app.use(compression() )     //compresses and decompress data being sent back and
 app.use(bodyParser.json({limit: '1mb'}))  //converts data to json objects for downstream processing
 app.use(bodyParser.urlencoded({ extended: false }))
 const path = require('path')
-const localAuth = require('./server_authentication/local_authentication')
-const azureAuth = require('./server_authentication/azure_authentication')
+
+// const localAuth = require('./server_authentication/local_authentication')
+// const azureAuth = require('./server_authentication/azure_authentication')
 
 
 //SetHttps['startHttpsServer'](app)
-const sqlorm = require('./sql_orm')
+// const sqlorm = require('./sql_orm')
+const { UpdateUser, CreateUser, FindUser, FindUserById } = require('./sql_orm')
 
-function authCheck (req, res, next) {
-    if(!req.user){ res.redirect('/login') } 
-    else { next() }
-}
-if (process.env.NODE_ENV === 'production') { azureAuth(app) }
-else { localAuth(app) }
-app.all('*', authCheck )
+// function authCheck (req, res, next) {
+//     if(!req.user){ res.redirect('/login') } 
+//     else { next() }
+// }
+// if (process.env.NODE_ENV === 'production') { azureAuth(app) }
+// else { localAuth(app) }
+// app.all('*', authCheck )
 
+// console.log('enviornment')
+// console.log(process.env)
+
+app.get('/',function(req,res) { res.send('hello app oauth') } )
+
+app.get('/user', async function(req,res) { 
+    try{
+        let user = await FindUserById('22')
+        res.send(user) 
+    } catch (e) {
+        res.send(e)
+    }    
+})
 
 //Initialize Passport
 //if prod
@@ -59,57 +74,57 @@ app.all('*', authCheck )
 
 
 
-const gridPath = path.join(__dirname, '/dist')
-console.log(gridPath)
-app.use(express.static(gridPath) )
+// const gridPath = path.join(__dirname, '/dist')
+// console.log(gridPath)
+// app.use(express.static(gridPath) )
 
 
-app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
+// app.get('/data/:schema_name/:table_name/', sqlorm.GetSelectRoute )
 
 
-app.post('/data/:schema_name/:table_name/:crud_type', sqlorm.SqlOrmRoute )
-// //all_route here
+// app.post('/data/:schema_name/:table_name/:crud_type', sqlorm.SqlOrmRoute )
+// // //all_route here
 
-// //for json configurations.
-app.get('/grid/:project_name/:table_name/', async (req, res) => {
-    /*
-    Select string
-    */
-    try{
-        let pn = req.params.project_name
-        let tn = req.params.table_name
-        let wx = [
-            {'column_name': 'project_name', 'value': pn, 'operator': '=' },
-            {'column_name': 'table_name',   'value': tn, 'operator': '=' },
-        ]
-        let config = await sqlorm.GridConfiguration(wx, req)
-        res.send(config)
-    } catch (e) {
+// // //for json configurations.
+// app.get('/grid/:project_name/:table_name/', async (req, res) => {
+//     /*
+//     Select string
+//     */
+//     try{
+//         let pn = req.params.project_name
+//         let tn = req.params.table_name
+//         let wx = [
+//             {'column_name': 'project_name', 'value': pn, 'operator': '=' },
+//             {'column_name': 'table_name',   'value': tn, 'operator': '=' },
+//         ]
+//         let config = await sqlorm.GridConfiguration(wx, req)
+//         res.send(config)
+//     } catch (e) {
 
-    }
+//     }
 
-})
+// })
 
-app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
-    /*
-    Select string for user permissions?
-    */
-    try{
-        let schema_name = req.params.schema_name
-        let table_name  = req.params.table_name
-        let id = req.params.id
+// app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
+//     /*
+//     Select string for user permissions?
+//     */
+//     try{
+//         let schema_name = req.params.schema_name
+//         let table_name  = req.params.table_name
+//         let id = req.params.id
 
-        let wx = [{'column_name': 'id', 'value': id, 'operator': '=' }]
+//         let wx = [{'column_name': 'id', 'value': id, 'operator': '=' }]
 
-        let vx = await sqlorm.RouteGuard(schema_name, table_name, wx, req)
+//         let vx = await sqlorm.RouteGuard(schema_name, table_name, wx, req)
 
-        console.log(vx)
-        res.send(vx)
-    } catch (e) {
+//         console.log(vx)
+//         res.send(vx)
+//     } catch (e) {
 
-    }
+//     }
 
-})
+// })
 
 // https://stackoverflow.com/questions/31425284/express-static-vs-res-sendfile
 
@@ -117,10 +132,10 @@ app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
 // console.log(gridPath)
 // app.use('/:project_name/:table_name', express.static(gridPath) )
 // const gridPath = path.join(__dirname, '/dist')
-console.log(gridPath)
+// console.log(gridPath)
 
-app.get( '/:project_name/:table_name', function(req,res) { 
-    res.sendFile(gridPath+ '/index.html') } )
+// app.get( '/:project_name/:table_name', function(req,res) { 
+//     res.sendFile(gridPath+ '/index.html') } )
 
 // app.use('/:project_name/:table_name',express.static(gridPath) )
 // app.use('/',(req,res,next) => {console.log('wtf'); next;}  ,express.static(gridPath))
@@ -128,6 +143,8 @@ app.get( '/:project_name/:table_name', function(req,res) {
 // app.use(express.static(gridPath) )
 // app.use('/',(req,res,next) => {console.log('wtf'); next;}  ,express.static(gridPath))
 // app.use(res.sendFile(gridPath))
+console.log('main test oauth.')
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
