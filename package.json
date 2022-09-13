@@ -37,7 +37,7 @@
     "passport-azure-ad": "^4.3.4",
     "passport-azure-oauth2": "^0.1.0",
     "passport-local": "^1.0.0",
-    "pg": "^8.7.3",
+    "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
     "redis": "^4.3.1",
     "relaxed-json": "^1.0.3",

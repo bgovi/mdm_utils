@@ -3,9 +3,17 @@ const redis = require('redis')
 const redisStore = require('connect-redis')(session)
 const config = require('../config')
 
-function SetSession(app, is_multicore=false) {
+async function SetSession(app, is_multicore=false) {
     if (is_multicore) {
-        const redisClient = redis.createClient()
+        const redisClient = redis.createClient({
+            socket: {
+                host: 'localhost',
+                port: 6380
+            }
+        }
+
+        )
+        await redisClient.connect()
         redisClient.on('error', (err) => {
             console.log('Redis error: ', err);
         });
@@ -16,7 +24,7 @@ function SetSession(app, is_multicore=false) {
             resave: false,
             saveUninitialized: true,
             cookie: { secure: false }, // Note that the cookie-parser module is no longer needed
-            store: new redisStore({ host: 'localhost', port: 6379, client: redisClient, ttl: 864000 }),
+            store: new redisStore({ host: 'localhost', port: 6380, client: redisClient, ttl: 864000 }),
         }));
     }
     else {

@@ -32,8 +32,8 @@ async function AuthenticateUser(username, password, done) {
 }
 
 
-function InitializePassportJs(app,is_multicore = false) {
-    SetSession(app, is_multicore)
+async function InitializePassportJs(app,is_multicore = false) {
+    await SetSession(app, is_multicore)
     app.use(passport.initialize());
     app.use(passport.session());
 

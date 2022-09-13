@@ -18,7 +18,7 @@ const { UpdateUser, CreateUser, FindUser } = require('../sql_orm')
 
 //*/
 
-function InitializePassportJs(app,is_multicore) {
+async function InitializePassportJs(app,is_multicore) {
     //functions used for passportjs
     //serialzie takes the user data extracts the id and returns a cookie to the browser
     passport.serializeUser((user, done) => {
@@ -87,7 +87,7 @@ function InitializePassportJs(app,is_multicore) {
             }
         })
     )
-    SetSession(app, is_multicore)
+    await SetSession(app, is_multicore)
     // initialize passport
     app.use(passport.initialize());
     app.use(passport.session());
