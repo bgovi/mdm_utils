@@ -62,7 +62,6 @@ async function InitializePassportJs(app,is_multicore = false) {
     app.get("/login", (req, res) => { res.render("login.ejs") })
     
     app.get('/logout', function(req, res, next){
-        console.log('logout')
         req.logout(function(err) {
           if (err) { return next(err); }
           res.redirect('/login');

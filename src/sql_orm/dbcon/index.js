@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === 'production') { dboptions ="?sslmode=require" }
 
 
 let conn_string = `postgresql://${config.db.user}:${config.db.password}@${host}/${config.db.database}${dboptions}`
-// console.log(conn_string)
+console.log(conn_string)
 
 const sequelize = new Sequelize(conn_string)
 

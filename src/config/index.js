@@ -9,7 +9,7 @@ module.exports = {
         host: process.env.HOST || 'localhost'
     },
     azure: {
-        clientID:  process.env.CLIENTID ||  'id',
+        clientID: process.env.CLIENTID ||  'id',
         clientSecret: process.env.CLIENT_SECRET || 'secret',
         cookieKey: process.env.COOKIEKEY || 'random'
     }

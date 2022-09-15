@@ -10,7 +10,7 @@ var AzureOAuth2Strategy  = require("passport-azure-oauth2")
 const config = require('../config')
 const SetSession = require('./set_session')
 var jwt = require("jwt-simple")
-const { UpdateUser, CreateUser, FindUser } = require('../sql_orm')
+const { UpdateUser, CreateUser, FindUser, FindUserById } = require('../sql_orm')
 
 
 //******************
@@ -98,11 +98,18 @@ async function InitializePassportJs(app,is_multicore) {
 
 function LoginLogOutRoutes(app) {
     // auth logout. Logout route. Deletes cookie and reroutes to login
-    app.get('/logout', (req, res) => {
-        req.logout();
-        res.clearCookie("connect.sid")
-        res.redirect('/login');
-    })
+    // app.get('/logout', (req, res) => {
+    //     req.logout();
+    //     res.clearCookie("connect.sid")
+    //     res.redirect('/login');
+    // })
+    app.get('/logout', function(req, res, next){
+        req.logout(function(err) {
+          if (err) { return next(err); }
+          res.redirect('/login');
+        });
+    });
+
 
     // auth with azure AD
     //logins user

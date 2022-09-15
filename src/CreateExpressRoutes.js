@@ -15,14 +15,25 @@ function authCheck (req, res, next) {
     else { next() }
 }
 
+// function authCheck (req, res, next) {
+//     req['user'] = {'id': 28, 'is_admin': false}
+//     next()
+//     // if(!req.user){ res.redirect('/login') } 
+//     // else { next() }
+// }
+
+
 async function CreateExpressRoutes(app, express, useMulti=false) {
-    if (process.env.NODE_ENV === 'production') { await azureAuth(app, useMulti) }
-    else { await localAuth(app, useMulti) }
+    // if (process.env.NODE_ENV === 'production') { await azureAuth(app, useMulti) }
+    // else { await localAuth(app, useMulti) }
+    // await localAuth(app, useMulti)
+    await azureAuth(app, useMulti)
     app.all('*', authCheck )
 
 
-    let dist_folder = '/dist_dev'
-    if (process.env.NODE_ENV === 'production') { dist_filder ='/dist_prod' }
+    // let dist_folder = '/dist_dev'
+    // if (process.env.NODE_ENV === 'production') { dist_filder ='/dist_prod' }
+    let dist_folder ='/dist_prod'
 
     //adds auth check to all routes below
     const gridPath = path.join(__dirname, dist_folder)
@@ -57,18 +68,26 @@ async function CreateExpressRoutes(app, express, useMulti=false) {
 
     })
 
-    app.get('/route_guard/:schema_name/:table_name/:id', async (req, res) => {
+    app.get('/route_guard/:schema_name/:table_name/:crud_type', async (req, res) => {
         /*
         Select string for user permissions?
         */
         try{
             let schema_name = req.params.schema_name
             let table_name  = req.params.table_name
-            let id = req.params.id
+            let crud_type   = req.params.crud_type
 
-            let wx = [{'column_name': 'id', 'value': id, 'operator': '=' }]
+            let allowct = 'allow_' + crud_type
 
-            let vx = await sqlorm.RouteGuard(schema_name, table_name, wx, req)
+            //app_admin.user_app_crud_permissions_v
+
+            let wx = [
+                {'column_name': 'schema_name', 'value': schema_name, 'operator': '=' },
+                {'column_name': 'table_name',  'value': table_name, 'operator': '=' },
+                {'column_name': allowct, 'value': 'true', 'operator': '=' },
+            ]
+
+            let vx = await sqlorm.RouteGuard('app_admin', 'user_app_crud_permissions_v', wx, req)
 
             console.log(vx)
             res.send(vx)

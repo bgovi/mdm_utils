@@ -17,7 +17,7 @@ NODE_ENV=production sudo node server.js
 
 // https://www.section.io/engineering-education/how-to-use-cors-in-nodejs-with-express/
 
-// require('dotenv').config()
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require("body-parser")
 const compression = require('compression')
@@ -36,9 +36,14 @@ const os = require("os")
 const CreateExpressRoutes = require('./CreateExpressRoutes')
 
 
+// app.use(cors({
+//     origin: '*'
+// }));
+
+
 let clusterWorkerSize = os.cpus().length
-console.log('number of clusters')
-console.log(clusterWorkerSize)
+// console.log('number of clusters')
+// console.log(clusterWorkerSize)
 clusterWorkerSize = 1
 
 if (clusterWorkerSize > 1) {
